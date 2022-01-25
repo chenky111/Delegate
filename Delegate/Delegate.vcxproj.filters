@@ -24,6 +24,9 @@
     <ClCompile Include="execute_main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ColorDebug.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h">
@@ -39,6 +42,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="newDelegate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorDebug.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <memory>
 #include "Delegate.h"
-#include "Common.h"
 #include "newDelegate.h"
+
 using namespace std;
 
 void F1(int a, char b, int& c, char* d)

@@ -1,4 +1,5 @@
 #pragma once
+#include "ColorDebug.h"
 #include <tuple>
 #include <iostream>
 
