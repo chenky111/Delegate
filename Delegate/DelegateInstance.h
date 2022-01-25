@@ -117,7 +117,7 @@ public:
 
 	InRetValType Execute() override final
 	{
-		std::cout << "Is MemberFunc" << std::endl;
+		WARNING_LOG("Is MemberFunc");
 		if (Functor == nullptr)
 		{
 			std::cout << "TMemberFuncDelegateInstance Execute Is Error" << std::endl;
@@ -180,7 +180,7 @@ public:
 
 	InRetValType Execute() override final
 	{
-		std::cout << "Is Lambda Call" << std::endl;
+		WARNING_LOG("Is Lambda Call");
 		return _CallFunc(TupleSequence{});
 	}
 

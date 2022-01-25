@@ -101,26 +101,26 @@ public:
 
 	TNewBaseDelegate(const TNewBaseDelegate& other)
 	{
-		std::cout << "const TNewBaseDelegate&  ";
+		WARNING_LOG("const TNewBaseDelegate&  ");
 		CopyForm(other);
 	}
 
 	TNewBaseDelegate(TNewBaseDelegate&& other) noexcept
 	{
-		std::cout << "TNewBaseDelegate&&  ";
+		WARNING_LOG("TNewBaseDelegate&&  ");
 		MoveForm(std::move(other));
 	}
 
 	TNewBaseDelegate& operator=(const TNewBaseDelegate& other)
 	{
-		std::cout << "operator= const TNewBaseDelegate& other  ";
+		WARNING_LOG("operator= const TNewBaseDelegate& other  ");
 		CopyForm(other);
 		return *this;
 	}
 
 	TNewBaseDelegate& operator=(TNewBaseDelegate&& other) noexcept
 	{
-		std::cout << "operator= TNewBaseDelegate&&  ";
+		WARNING_LOG("operator= TNewBaseDelegate&&  ");
 		MoveForm(std::move(other));
 		return *this;
 	}
@@ -128,7 +128,7 @@ public:
 public:
 	virtual void CopyForm(const TNewBaseDelegate& other)
 	{
-		std::cout << "Is Copy" << std::endl;
+		WARNING_LOG("Is Copy");
 		this->ins = other.ins;
 		//*this->ins = *other.ins;
 		//*this = other;
@@ -136,14 +136,14 @@ public:
 
 	virtual void MoveForm(TNewBaseDelegate&& other)
 	{
-		std::cout << "Is Move" << std::endl;
+		WARNING_LOG("Is Move");
 		this->ins.swap(other.ins);
 		other.ins = nullptr;
 	}
 
 	void Count()
 	{
-		std::cout << "Count = " << ins.use_count() << std::endl;
+		WARNING_LOG("Count = " << ins.use_count());
 	}
 
 protected:

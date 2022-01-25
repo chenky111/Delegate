@@ -8,15 +8,14 @@ using namespace std;
 
 void F1(int a, char b, int& c, char* d)
 {
-	cout << a << " , " << b << " , " << c << " , " << d;
-	cout << endl;
+	DEBUG_LOG(a, b, c, d);
 	c = 90;
 	*d = 'k';
 }
 
 void F2(int a, char* b)
 {
-	cout << a <<  ", " << b << endl;
+	DEBUG_LOG(a, b);
 }
 
 int F3(int a, int& b)

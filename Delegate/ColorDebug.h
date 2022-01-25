@@ -16,6 +16,8 @@ struct SFileLine
 
 void AppendLog(std::string& str, const std::string& value);
 void AppendLog(std::string& str, const char* value);
+void AppendLog(std::string& str, char* value);
+void AppendLog(std::string& str, const char& value);
 
 template<typename T>
 void AppendLog(std::string& str, T value)

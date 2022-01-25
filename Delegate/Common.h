@@ -121,12 +121,12 @@ decltype(auto) InvokeAfter(FuncType&& func, TupleType&& tupleIns, ParamTypes&&..
 	//auto t = std::forward_as_tuple(std::forward<ParamTypes>(params)...); //err
 	auto t = std::make_tuple(std::forward<ParamTypes>(params)...);
 	constexpr size_t TotalSize = std::tuple_size_v<decltype(t)> + std::tuple_size_v<std::decay_t<TupleType>>;
-	static_assert(TotalSize >= 0, "Params Count Is Error");
+	static_assert(TotalSize >= 0, "params count is error");
 	using TupleSequence = std::make_index_sequence<TotalSize>;
 	auto CallTuple = std::tuple_cat(tupleIns, t);
-	std::cout << typeid(decltype(CallTuple)).name() << std::endl;
-	std::cout << typeid(decltype(tupleIns)).name() << std::endl;
-	std::cout << typeid(decltype(t)).name() << std::endl;
+	WARNING_LOG(typeid(decltype(CallTuple)).name());
+	WARNING_LOG(typeid(decltype(tupleIns)).name());
+	WARNING_LOG(typeid(decltype(t)).name());
 	return Invoke(std::forward<FuncType>(func), CallTuple, TupleSequence{});
 }
 
