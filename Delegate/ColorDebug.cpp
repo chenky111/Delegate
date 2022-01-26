@@ -49,7 +49,7 @@ std::string GetLogFileName(const std::string& fileName)
 		result = fileName.substr(pos + 1);
 
 		//只要文件名和目录名
-		if (++counter >= 2)
+		if (++counter >= 1/*2*/)
 			break;
 	}
 

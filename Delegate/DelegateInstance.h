@@ -120,7 +120,7 @@ public:
 		WARNING_LOG("Is MemberFunc");
 		if (Functor == nullptr)
 		{
-			std::cout << "TMemberFuncDelegateInstance Execute Is Error" << std::endl;
+			ERROR_LOG("TMemberFuncDelegateInstance Execute Is Error");
 			return InRetValType();
 		}
 
