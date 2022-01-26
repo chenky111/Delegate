@@ -8,7 +8,7 @@ using namespace std;
 
 void F1(int a, char b, int& c, char* d)
 {
-	DEBUG_LOG(a, b, c, d);
+	DEBUG_LOG(a, b, c, *d);
 	c = 90;
 	*d = 'k';
 }
@@ -26,23 +26,25 @@ int F3(int a, int& b)
 #if 1
 int main()
 {
-// 	int a = 10;
-// 	char b = 'y';
-// 	int& c = a;
-// 	char* d = &b;
-// 
-// 	cout << d << endl;
-// 
 // 	{
-// 		TTuple<int, char> t1(a, b);
-// 		t1.ApplyAfter(F1, c, d);
+// 		int a = 10;
+// 		char b = 'y';
+// 		int& c = a;
+// 		char* d = &b;
 // 
-// 		TTuple<int&, char*> t2(c, d);
-// 		t2.ApplyBefor(F1, a, b);
+// 		cout << *d << endl;
+// 
+// 		{
+// 			TTuple<int, char> t1(a, b);
+// 			t1.ApplyAfter(F1, c, d);
+// 
+// 			TTuple<int&, char*> t2(c, d);
+// 			t2.ApplyBefor(F1, a, b);
+// 		}
+// 
+// 		cout << a << " , " << b << " , " << c << " , " << *d;
+// 		cout << endl;
 // 	}
-// 
-// 	cout << a << " , " << b << " , " << c << " , " << d;
-// 	cout << endl;
 
 	{
 		//Ä¿Ç°BUG×´¿ö£º
