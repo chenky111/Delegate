@@ -46,6 +46,28 @@ class FT<Ret(Paras...), Args...>
 };
 
 
+//创建参数包在 index 之后的参数类型的 tuple 类型
+template<int index, typename... Args>
+struct TMakeTupleParamsUtil;
+
+//index 必须为 [0 ~ N-1]
+template<int index, typename FirstType, typename... Args>
+struct TMakeTupleParamsUtil<index, FirstType, Args...>
+{
+	using type = typename TMakeTupleParamsUtil<index - 1, Args...>::type;
+};
+
+template<typename T, typename... Args>
+struct TMakeTupleParamsUtil<0, T, Args...>
+{
+	using type = std::tuple<T, Args...>;
+};
+
+//condition 为 false 返回空的 tuple
+template<bool condition, int index, typename... Args>
+using TMakeTupleParamsUtil_t = std::conditional_t<condition, typename TMakeTupleParamsUtil<index, Args...>::type, std::tuple<>>;
+
+
 template<typename... Types>
 class TTuple
 {
@@ -62,15 +84,40 @@ public:
 
 	}
 
+	explicit TTuple(const std::tuple<Types...>& InTuple)
+		: TupleIns(InTuple)
+	{
+	}
+
+	template<typename FuncType, typename InTuple>
+	decltype(auto) ApplyAfter(FuncType&& Func, InTuple&& t) const
+	{
+		constexpr size_t totalSize = std::tuple_size_v<decltype(t)> +std::tuple_size_v<decltype(TupleIns)>;
+		static_assert(totalSize >= 0, "Params Count Is Error");
+		using TupleSequence = std::make_index_sequence<totalSize>;
+		auto CallTuple = std::tuple_cat(TupleIns, t);
+		return Call(Func, CallTuple, TupleSequence{});
+	}
+
+	template<typename FuncType, typename InTuple>
+	decltype(auto) ApplyBefor(FuncType&& Func, InTuple&& t) const
+	{
+		constexpr size_t totalSize = std::tuple_size_v<decltype(t)> +std::tuple_size_v<decltype(TupleIns)>;
+		static_assert(totalSize >= 0, "Params Count Is Error");
+		using TupleSequence = std::make_index_sequence<totalSize>;
+		auto CallTuple = std::tuple_cat(t, TupleIns);
+		return Call(Func, CallTuple, TupleSequence{});
+	}
+
 	template<typename FuncType, typename... ArgTypes>
 	decltype(auto) ApplyAfter(FuncType&& Func, ArgTypes&&... Args) const
 	{
 		//Invoke(std::forward<FuncType>(Func), TupleSequence{}, false, std::forward<ArgTypes>(Args)...);
 		auto t = std::forward_as_tuple(std::forward<ArgTypes>(Args)...);
-		constexpr size_t TotalSize = std::tuple_size_v<decltype(t)> + std::tuple_size_v<decltype(TupleIns)>;
+		constexpr size_t totalSize = std::tuple_size_v<decltype(t)> +std::tuple_size_v<decltype(TupleIns)>;
 		//std::cout << TotalSize << std::endl;
-		static_assert(TotalSize >= 0, "Params Count Is Error");
-		using TupleSequence = std::make_index_sequence<TotalSize>;
+		static_assert(totalSize >= 0, "Params Count Is Error");
+		using TupleSequence = std::make_index_sequence<totalSize>;
 		auto CallTuple = std::tuple_cat(TupleIns, t);
 		return Call(Func, CallTuple, TupleSequence{});
 	}
@@ -80,10 +127,10 @@ public:
 	{
 		//Invoke(std::forward<FuncType>(Func), TupleSequence{}, false, std::forward<ArgTypes>(Args)...);
 		auto t = std::forward_as_tuple(std::forward<ArgTypes>(Args)...);
-		constexpr size_t TotalSize = std::tuple_size_v<decltype(t)> + std::tuple_size_v<decltype(TupleIns)>;
+		constexpr size_t totalSize = std::tuple_size_v<decltype(t)> + std::tuple_size_v<decltype(TupleIns)>;
 		//std::cout << TotalSize << std::endl;
-		static_assert(TotalSize >= 0, "Params Count Is Error");
-		using TupleSequence = std::make_index_sequence<TotalSize>;
+		static_assert(totalSize >= 0, "Params Count Is Error");
+		using TupleSequence = std::make_index_sequence<totalSize>;
 		auto CallTuple = std::tuple_cat(t, TupleIns);
 		return Call(Func, CallTuple, TupleSequence{});
 	}
@@ -124,6 +171,21 @@ decltype(auto) InvokeAfter(FuncType&& func, TupleType&& tupleIns, ParamTypes&&..
 	static_assert(TotalSize >= 0, "params count is error");
 	using TupleSequence = std::make_index_sequence<TotalSize>;
 	auto CallTuple = std::tuple_cat(tupleIns, t);
+	WARNING_LOG(typeid(decltype(CallTuple)).name());
+	WARNING_LOG(typeid(decltype(tupleIns)).name());
+	WARNING_LOG(typeid(decltype(t)).name());
+	return Invoke(std::forward<FuncType>(func), CallTuple, TupleSequence{});
+}
+
+template<typename FuncType, typename TupleType, typename... ParamTypes>
+decltype(auto) InvokeBefor(FuncType&& func, TupleType&& tupleIns, ParamTypes&&... params)
+{
+	//auto t = std::forward_as_tuple(std::forward<ParamTypes>(params)...); //err
+	auto t = std::make_tuple(std::forward<ParamTypes>(params)...);
+	constexpr size_t TotalSize = std::tuple_size_v<decltype(t)> +std::tuple_size_v<std::decay_t<TupleType>>;
+	static_assert(TotalSize >= 0, "params count is error");
+	using TupleSequence = std::make_index_sequence<TotalSize>;
+	auto CallTuple = std::tuple_cat(t, tupleIns);
 	WARNING_LOG(typeid(decltype(CallTuple)).name());
 	WARNING_LOG(typeid(decltype(tupleIns)).name());
 	WARNING_LOG(typeid(decltype(t)).name());

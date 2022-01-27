@@ -6,6 +6,11 @@
 
 using namespace std;
 
+void F0()
+{
+	DEBUG_LOG("is ok");
+}
+
 void F1(int a, char b, int& c, char* d)
 {
 	DEBUG_LOG(a, b, c, *d);
@@ -45,6 +50,9 @@ int main()
 // 		cout << a << " , " << b << " , " << c << " , " << *d;
 // 		cout << endl;
 // 	}
+
+// 	TTuple gt;
+// 	gt.ApplyAfter(F0);
 
 	{
 		//Ä¿Ç°BUG×´¿ö£º
@@ -96,14 +104,27 @@ int main()
 	//	C1.Excute(a);
 	//}
 
-	{
-		int c = 'c';
-		using FType = decltype(F2);
-		TNewDelegate<FType> C1 = TNewDelegate<FType>::CreateStatic(F2);
-		C1.Excute(10, (char*)&c);
-	}
+
+	//{
+	//	int c = 'c';
+	//	using FType = decltype(F2);
+	//	TNewDelegate<FType> C1 = TNewDelegate<FType>::CreateStatic(F2);
+	//	C1.Excute(10, (char*)&c);
+	//}
+
+
 
 	system("pause");
 	return 0;
 }
 #endif
+
+
+// int main()
+// {
+// 	using type = TMakeTupleParamsUtil_t<2 >= 1, 4 - 2, int, bool, float, double>;
+// 	DEBUG_LOG(typeid(type).name());	
+// 
+// 	system("pause");
+// 	return 0;
+// }

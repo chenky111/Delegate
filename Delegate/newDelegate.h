@@ -2,21 +2,30 @@
 #include "Common.h"
 #include <memory>
 
-template<typename FuncType>
+template<typename FuncType, typename... VarTypes>
 class TNewBaseDelegateInstance;
 
-template<typename InRetValType, typename... ParamTypes>
-class TNewBaseDelegateInstance<InRetValType(ParamTypes...)>
+template<typename InRetValType, typename... ParamTypes, typename... VarTypes>
+class TNewBaseDelegateInstance<InRetValType(ParamTypes...), VarTypes...>
 {
 	template<typename T>
 	friend class TNewBaseDelegate;
 
 public:
-	TNewBaseDelegateInstance() = default;
+	using TupleType = TTuple<VarTypes...>;
+	using ExcuteTuple = TMakeTupleParamsUtil_t<sizeof...(ParamTypes) >= 1, sizeof...(ParamTypes) - sizeof...(VarTypes), ParamTypes...>;
+
+public:
+	TNewBaseDelegateInstance(VarTypes... Vars)
+		: paramters(std::make_tuple(Vars...))
+	{
+
+	}
+
 	virtual ~TNewBaseDelegateInstance() = default;
 
 public:
-	virtual InRetValType Execute(ParamTypes... args)
+	virtual InRetValType Execute(ExcuteTuple argsTuple)
 	{
 		return InRetValType();
 	}
@@ -25,6 +34,9 @@ public:
 	{
 		return true;
 	}
+
+protected:
+	TupleType paramters;
 };
 
 //因为 std::get 返回的类型是左值，转换不了右值，所以不支持右值引用类型，支持万能引用
@@ -32,25 +44,28 @@ template<typename FuncType, typename... VarTypes>
 class TNewStaticDelegateInstance;
 
 template<typename InRetValType, typename... ParamTypes, typename... VarTypes>
-class TNewStaticDelegateInstance<InRetValType(ParamTypes...), VarTypes...> : public TNewBaseDelegateInstance<InRetValType(ParamTypes...)>
+class TNewStaticDelegateInstance<InRetValType(ParamTypes...), VarTypes...> : public TNewBaseDelegateInstance<InRetValType(ParamTypes...), VarTypes...>
 {
 	template<typename T>
 	friend class TNewBaseDelegate;
 
 public:
+	using Super = TNewBaseDelegateInstance<InRetValType(ParamTypes...), VarTypes...>;
 	using RetValType = InRetValType;
 	using FuncType = InRetValType(ParamTypes...);
 	using FuncTypePtr = InRetValType(*)(ParamTypes...);
 	using TupleType = std::tuple<VarTypes...>;
+	//using TupleType = typename Super::TupleType;
 	using TupleSequence = std::index_sequence_for<ParamTypes...>;
+	using ExcuteTuple = typename Super::ExcuteTuple;
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
 	explicit TNewStaticDelegateInstance(FuncTypePtr InFunc, VarTypes... Vars)
-		: Functor(InFunc)
-		, paramters(std::make_tuple(Vars...))		//函数使用引用参数会报错，因为内部调用 std::decay (朽化)，移除了引用类型
+		: Super(Vars...)
+		, Functor(InFunc)
+		//, paramters(std::make_tuple(Vars...))		//函数使用引用参数会报错，因为内部调用 std::decay (朽化)，移除了引用类型
 	{
-
 	}
 
 public:
@@ -60,11 +75,12 @@ public:
 		return true;
 	}
 
-	InRetValType Execute(ParamTypes... args) override final
+	InRetValType Execute(const ExcuteTuple& argsTuple) override final
 	{
 		//std::cout << "Is Base" << std::endl;
 		//return _CallFunc(TupleSequence{});
-		return InvokeAfter(*Functor, paramters, args...);
+		//return InvokeAfter(*Functor, paramters, args...);
+		return this->paramters.ApplyAfter(*Functor, argsTuple);
 		//return InRetValType();
 	}
 
@@ -76,11 +92,12 @@ private:
 		//std::initializer_list<char> { (std::cout << typeid(std::get<Index>(paramters)).name() << " , ", 0)... };
 		//std::cout << std::endl;
 
-		return (*Functor)(std::get<Index>(paramters)...);
+		//return (*Functor)(std::get<Index>(this->paramters)...);
+		return InRetValType();
 	}
 
 	FuncTypePtr Functor;
-	TupleType paramters;
+	//TupleType paramters;
 };
 
 
@@ -191,9 +208,9 @@ public:
 	}
 
 	template<typename... Args>
-	InRetValType Excute(Args... args)
+	InRetValType Excute(Args&&... args)
 	{
-		//继承模板类，需要使用 this 指针来使用父类的成员变量
-		return this->ins->Execute(args...);
+		//return this->ins->Execute(std::make_tuple<Args>(args)...);
+		return this->ins->Execute(std::forward_as_tuple(std::forward<Args>(args)...));
 	}
 };
