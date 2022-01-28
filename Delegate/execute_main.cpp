@@ -120,6 +120,30 @@ int main()
 #endif
 
 
+
+namespace test
+{
+	template<typename... Members>
+	struct member_sequence {
+		using type = member_sequence<Members...>;
+	};
+	template <typename, typename>
+	struct push_member_sequence;
+
+	template <typename M, typename... Members>
+	struct push_member_sequence<M, member_sequence<Members...>>
+		: member_sequence<Members...> {};
+
+	template <size_t N, typename Head, typename... Tail>
+	struct make_member_sequence
+		: push_member_sequence<Head, typename make_member_sequence<N - 1, Tail...>::type>::type {};
+
+	template<typename M, typename... OneLeft>
+	struct make_member_sequence <0, M, OneLeft...> :
+		push_member_sequence<M, member_sequence<OneLeft...>>::type {};
+}
+
+
 // int main()
 // {
 // 	using type = TMakeTupleParamsUtil_t<2 >= 1, 4 - 2, int, bool, float, double>;
