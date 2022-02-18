@@ -47,5 +47,8 @@
     <ClInclude Include="ColorDebug.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TupleUtil.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

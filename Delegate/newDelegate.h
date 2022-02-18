@@ -12,8 +12,9 @@ class TNewBaseDelegateInstance<InRetValType(ParamTypes...), VarTypes...>
 	friend class TNewBaseDelegate;
 
 public:
+	using FuncType = InRetValType(ParamTypes...);
 	using TupleType = TTuple<VarTypes...>;
-	using ExcuteTuple = TMakeTupleParamsUtil_t<sizeof...(ParamTypes) >= 1, sizeof...(ParamTypes) - sizeof...(VarTypes), ParamTypes...>;
+	using ExcuteTuple = typename TMakeTupleOffsetUtil<FuncType, ParamTypes...>::type;
 
 public:
 	TNewBaseDelegateInstance(VarTypes... Vars)
@@ -25,7 +26,7 @@ public:
 	virtual ~TNewBaseDelegateInstance() = default;
 
 public:
-	virtual InRetValType Execute(ExcuteTuple argsTuple)
+	virtual InRetValType Execute(ExcuteTuple&& argsTuple)
 	{
 		return InRetValType();
 	}
@@ -75,12 +76,30 @@ public:
 		return true;
 	}
 
-	InRetValType Execute(const ExcuteTuple& argsTuple) override final
+	InRetValType Execute(ExcuteTuple&& argsTuple) override final
 	{
 		//std::cout << "Is Base" << std::endl;
 		//return _CallFunc(TupleSequence{});
 		//return InvokeAfter(*Functor, paramters, args...);
-		return this->paramters.ApplyAfter(*Functor, argsTuple);
+		//return this->paramters.ApplyAfter(*Functor, std::forward<ExcuteTuple>(argsTuple));
+		
+		//constexpr size_t totalSize = std::tuple_size_v<decltype(this->paramters.get())> + std::tuple_size_v<decltype(argsTuple)>;
+		//static_assert(totalSize >= 0, "Params Count Is Error");
+		//using TupleSequence = std::make_index_sequence<totalSize>;
+		//auto CallTuple = std::tuple_cat(this->paramters.get(), argsTuple);
+
+		//std::tuple<> a;
+		//using at = std::decay_t<ExcuteTuple>;
+
+		if constexpr (std::is_same_v<std::decay_t<ExcuteTuple>, std::tuple<>>)
+		{
+			auto size = 0;
+		}
+		else
+		{
+			auto size = std::tuple_size_v<decltype(ExcuteTuple)>;
+		}
+
 		//return InRetValType();
 	}
 

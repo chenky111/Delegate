@@ -105,50 +105,27 @@ int main()
 	//}
 
 
-	//{
-	//	int c = 'c';
-	//	using FType = decltype(F2);
-	//	TNewDelegate<FType> C1 = TNewDelegate<FType>::CreateStatic(F2);
-	//	C1.Excute(10, (char*)&c);
-	//}
+	{
+		int c = 'c';
+		using FType = decltype(F2);
+		TNewDelegate<FType> C1 = TNewDelegate<FType>::CreateStatic(F2);
+		//C1.Excute(10, (char*)&c);
+	}
 
-
+	//using FF1 = void(int, char, bool);
+	//using FT1 = TMakeTupleOffsetUtil<FF1>;
+	//using FT2 = TMakeTupleOffsetUtil<FF1, int>;
+	//using FT3 = TMakeTupleOffsetUtil<FF1, int, char>;
+	//using FT4 = TMakeTupleOffsetUtil<FF1, int, char, bool>;
+	//using FT5 = TMakeTupleOffsetUtil<void()>;
+	//std::cout << typeid(FT1::type).name() << std::endl;
+	//std::cout << typeid(FT2::type).name() << std::endl;
+	//std::cout << typeid(FT3::type).name() << std::endl;
+	//std::cout << typeid(FT4::type).name() << std::endl;
+	//std::cout << typeid(FT5::type).name() << std::endl;
 
 	system("pause");
 	return 0;
 }
 #endif
 
-
-
-namespace test
-{
-	template<typename... Members>
-	struct member_sequence {
-		using type = member_sequence<Members...>;
-	};
-	template <typename, typename>
-	struct push_member_sequence;
-
-	template <typename M, typename... Members>
-	struct push_member_sequence<M, member_sequence<Members...>>
-		: member_sequence<Members...> {};
-
-	template <size_t N, typename Head, typename... Tail>
-	struct make_member_sequence
-		: push_member_sequence<Head, typename make_member_sequence<N - 1, Tail...>::type>::type {};
-
-	template<typename M, typename... OneLeft>
-	struct make_member_sequence <0, M, OneLeft...> :
-		push_member_sequence<M, member_sequence<OneLeft...>>::type {};
-}
-
-
-// int main()
-// {
-// 	using type = TMakeTupleParamsUtil_t<2 >= 1, 4 - 2, int, bool, float, double>;
-// 	DEBUG_LOG(typeid(type).name());	
-// 
-// 	system("pause");
-// 	return 0;
-// }
