@@ -107,9 +107,12 @@ int main()
 
 	{
 		int c = 'c';
+		char* d = nullptr;
 		using FType = decltype(F2);
+		//TNewDelegate<FType> C1 = TNewDelegate<FType>::CreateStatic(F2, c, d); //err, 暂时不支持提前绑定参数，TBaseNewDelegate 的 ins 没有第二个模板参数
 		TNewDelegate<FType> C1 = TNewDelegate<FType>::CreateStatic(F2);
-		//C1.Excute(10, (char*)&c);
+		//C1.Excute(c);
+		//C1.Excute(c, d);
 	}
 
 	//using FF1 = void(int, char, bool);
@@ -123,6 +126,25 @@ int main()
 	//std::cout << typeid(FT3::type).name() << std::endl;
 	//std::cout << typeid(FT4::type).name() << std::endl;
 	//std::cout << typeid(FT5::type).name() << std::endl;
+
+	system("pause");
+	return 0;
+}
+#else
+
+template<typename... Args>
+void TestType(Args&&... args)
+{
+	using namespace std;
+	using type = decltype(std::forward_as_tuple(std::forward<Args>(args)...));
+	//using type = decltype(std::make_tuple(std::forward<Args>(args)...));
+	cout << typeid(type).name() << endl;
+}
+
+int main()
+{
+	int a = 0;
+	TestType(10, a);
 
 	system("pause");
 	return 0;

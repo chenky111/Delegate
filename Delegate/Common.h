@@ -34,5 +34,19 @@ public:
 	using ReturnType = RetValue;
 };
 
+template<typename... Args>
+void PrintType(Args&&... args)
+{
+	int i = 0;
+	(ColorDebug(enmCFC_Blue, enmCBC_Black, __GET_FILE_LINE(), 
+		(++i, "Type ->", typeid(std::forward<Args>(args)).name())), ...);
+}
+
+template<typename T>
+void PrintType()
+{
+	ColorDebug(enmCFC_Blue, enmCBC_Black, __GET_FILE_LINE(), typeid(T).name());
+}
+
 
 
