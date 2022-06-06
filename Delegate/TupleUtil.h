@@ -73,6 +73,45 @@ struct TMakeTupleOffsetUtil<T(Params...), Args...>
 	using type = TMakeTupleOffset<argsNum, Params...>;
 };
 
+/*=====================================================================================================*/
+
+template<size_t N, typename TupleType, typename T, typename... Args>
+struct TTupleForwardOffset;
+
+template<size_t N, typename... Params, typename T, typename... Args>
+struct TTupleForwardOffset<N, std::tuple<Params...>, T, Args...> : std::true_type
+{
+	using type = typename TTupleForwardOffset<N - 1, std::tuple<Params..., T>, Args...>::type;
+};
+
+template<typename... Params, typename T, typename... Args>
+struct TTupleForwardOffset<0, std::tuple<Params...>, T, Args...> : std::true_type
+{
+	using type = std::tuple<Params...>;
+};
+
+
+/*
+* 偏移参数后的 tuple 类型(前面的参数)
+* @index: 必须为 [0 ~ N-1]
+*/
+template<size_t N, typename T, typename... Args>
+struct TTupleForwardOffsetUtil : TTupleForwardOffset<N, std::tuple<>, T, Args...> {};
+
+/*
+* 创建偏移后，前面的参数类型,
+* 需要 C++17 的短路编译,否则会编译不过,失败默认返回 std::tuple<>
+* @Index: 参数的偏移位置, 从0开始
+* @Params: 参数
+*/
+template<size_t Index, typename... Params>
+using TMakeTupleForwardOffset = typename std::disjunction<
+	std::conditional_t<(sizeof...(Params) >= 1 && sizeof...(Params) == Index), default_type<std::tuple<>>, std::false_type>,
+	std::conditional_t<(sizeof...(Params) >= 1 && sizeof...(Params) > Index), TTupleForwardOffsetUtil<Index, Params...>, std::false_type>,
+	default_type<std::tuple<>>
+>::type;
+
+/*=====================================================================================================*/
 
 template<typename... Types>
 class TTuple
