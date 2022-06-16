@@ -1,6 +1,7 @@
 #pragma once
 #include "ColorDebug.h"
 #include "TupleUtil.h"
+#include <any>
 #include <tuple>
 #include <iostream>
 
@@ -10,7 +11,8 @@ using BaseFuncType = void(*)(void);
 template<typename T>
 struct TDefineType
 {
-	typedef T Type;
+	//typedef T Type;
+	using Type = T;
 };
 
 //成员函数指针模板类型
@@ -39,7 +41,7 @@ void PrintType(Args&&... args)
 {
 	int i = 0;
 	(ColorDebug(enmCFC_Blue, enmCBC_Black, __GET_FILE_LINE(), 
-		(++i, "Type ->", typeid(std::forward<Args>(args)).name())), ...);
+		(++i, std::string("Type -> ") + std::string(typeid(std::forward<Args>(args)).name()))), ...);
 }
 
 template<typename T>
