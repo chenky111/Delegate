@@ -51,6 +51,20 @@ int main()
 	c = D1.ExcuteEx<int, int&>(a, b);
 	DEBUG_LOG(a, b, c);
 
+	WARNING_LOG("*********");
+	D1 = TNewDelegate<FType>::CreateStatic(F3);
+	D1.setParamters<int&>(b);
+	DEBUG_LOG(D1.ExcuteAfter(a));
+	DEBUG_LOG(D1.ExcuteAfterEx<int>(a));
+
+	WARNING_LOG("*********");
+	char p = 's';
+	using FType2 = decltype(F1);
+	TNewDelegate<FType2> D3 = TNewDelegate<FType2>::CreateStatic(F1);
+	D3.setParamters<int&, char*>(b, &p);
+	D3.ExcuteAfter(a, p);
+	ERROR_LOG(b, p);
+
 	system("pause");
 	return 0;
 }

@@ -45,11 +45,20 @@ public:
 		paramters = std::tuple<Args...>(args...);
 	}
 
+	//从头开始偏移参数
 	template<size_t ArgsSize>
 	decltype(auto) CastParamters()
 	{
 		constexpr size_t index = sizeof...(ParamTypes) - ArgsSize;	//得到已经填充了多少个参数
 		return std::any_cast<TMakeTupleForwardOffset<index, ParamTypes...>>(paramters);
+	}
+
+	//从尾开始偏移参数
+	template<size_t ArgsSize>
+	decltype(auto) BackCastParamters()
+	{
+		constexpr size_t index = sizeof...(ParamTypes) - ArgsSize;	//得到已经填充了多少个参数
+		return std::any_cast<TMakeTupleOffset<index, ParamTypes...>>(paramters);
 	}
 
 	virtual bool IsVaild()
@@ -207,7 +216,7 @@ public:
 	}
 
 public:
-	//设置参数, 需要使用 <> 指定类型
+	//设置参数, 引用类型需要使用 <> 指定类型
 	template<typename... Args>
 	void setParamters(const Args&... args)
 	{
@@ -234,5 +243,19 @@ public:
 	InRetValType ExcuteEx(const Args&... args)
 	{
 		return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::tuple<Args...>(args...)));
+	}
+
+	//参数置后再执行
+	template<typename... Args>
+	InRetValType ExcuteAfter(Args&&... args)
+	{
+		return this->ins->Execute(std::tuple_cat(std::make_tuple(std::forward<Args>(args)...), this->ins->BackCastParamters<sizeof...(Args)>()));
+	}
+
+	//参数置后再执行, 可以接受引用类型, 需要使用 <> 指定类型
+	template<typename... Args>
+	InRetValType ExcuteAfterEx(const Args&... args)
+	{
+		return this->ins->Execute((std::tuple_cat(std::tuple<Args...>(args...), this->ins->BackCastParamters<sizeof...(Args)>())));
 	}
 };
