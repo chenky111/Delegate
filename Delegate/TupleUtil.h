@@ -157,10 +157,8 @@ public:
 	template<typename FuncType, typename... ArgTypes>
 	decltype(auto) ApplyAfter(FuncType&& Func, ArgTypes&&... Args) const
 	{
-		//Invoke(std::forward<FuncType>(Func), TupleSequence{}, false, std::forward<ArgTypes>(Args)...);
 		auto t = std::forward_as_tuple(std::forward<ArgTypes>(Args)...);
 		constexpr size_t totalSize = std::tuple_size_v<decltype(t)> + std::tuple_size_v<decltype(_tupleIns)>;
-		//std::cout << TotalSize << std::endl;
 		static_assert(totalSize >= 0, "Params Count Is Error");
 		using TupleSequence = std::make_index_sequence<totalSize>;
 		auto CallTuple = std::tuple_cat(_tupleIns, t);
@@ -170,10 +168,8 @@ public:
 	template<typename FuncType, typename... ArgTypes>
 	decltype(auto) ApplyBefor(FuncType&& Func, ArgTypes&&... Args) const
 	{
-		//Invoke(std::forward<FuncType>(Func), TupleSequence{}, false, std::forward<ArgTypes>(Args)...);
 		auto t = std::forward_as_tuple(std::forward<ArgTypes>(Args)...);
 		constexpr size_t totalSize = std::tuple_size_v<decltype(t)> + std::tuple_size_v<decltype(_tupleIns)>;
-		//std::cout << TotalSize << std::endl;
 		static_assert(totalSize >= 0, "Params Count Is Error");
 		using TupleSequence = std::make_index_sequence<totalSize>;
 		auto CallTuple = std::tuple_cat(t, _tupleIns);
@@ -216,29 +212,21 @@ auto Invoke(FuncType&& func, InTuple&& t, std::index_sequence<Index...>)
 template<typename FuncType, typename TupleType, typename... ParamTypes>
 decltype(auto) InvokeAfter(FuncType&& func, TupleType&& tupleIns, ParamTypes&&... params)
 {
-	//auto t = std::forward_as_tuple(std::forward<ParamTypes>(params)...); //err
 	auto t = std::make_tuple(std::forward<ParamTypes>(params)...);
 	constexpr size_t TotalSize = std::tuple_size_v<decltype(t)> + std::tuple_size_v<std::decay_t<TupleType>>;
 	static_assert(TotalSize >= 0, "params count is error");
 	using TupleSequence = std::make_index_sequence<TotalSize>;
 	auto CallTuple = std::tuple_cat(tupleIns, std::move(t));
-	//WARNING_LOG(typeid(decltype(CallTuple)).name());
-	//WARNING_LOG(typeid(decltype(tupleIns)).name());
-	//WARNING_LOG(typeid(decltype(t)).name());
 	return Invoke(std::forward<FuncType>(func), CallTuple, TupleSequence{});
 }
 
 template<typename FuncType, typename TupleType, typename... ParamTypes>
 decltype(auto) InvokeBefor(FuncType&& func, TupleType&& tupleIns, ParamTypes&&... params)
 {
-	//auto t = std::forward_as_tuple(std::forward<ParamTypes>(params)...); //err
 	auto t = std::make_tuple(std::forward<ParamTypes>(params)...);
 	constexpr size_t TotalSize = std::tuple_size_v<decltype(t)> + std::tuple_size_v<std::decay_t<TupleType>>;
 	static_assert(TotalSize >= 0, "params count is error");
 	using TupleSequence = std::make_index_sequence<TotalSize>;
 	auto CallTuple = std::tuple_cat(std::move(t), tupleIns);
-	//WARNING_LOG(typeid(decltype(CallTuple)).name());
-	//WARNING_LOG(typeid(decltype(tupleIns)).name());
-	//WARNING_LOG(typeid(decltype(t)).name());
 	return Invoke(std::forward<FuncType>(func), CallTuple, TupleSequence{});
 }
