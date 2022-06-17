@@ -11,45 +11,84 @@ class TBaseDelegateInstance<InRetValType(ParamTypes...)>
 	friend class TBaseDelegate;
 
 public:
+	using FuncType = InRetValType(ParamTypes...);
+	//using ExcuteTuple = typename TMakeTupleOffsetUtil<FuncType, ParamTypes...>::type;
+
+public:
 	TBaseDelegateInstance() = default;
 	virtual ~TBaseDelegateInstance() = default;
 
 public:
-	virtual InRetValType Execute(ParamTypes... args)
+
+	virtual InRetValType Execute(std::tuple<ParamTypes...>&& argsTuple)
 	{
 		return InRetValType();
+	}
+
+	//默认, 不能接受引用类型
+	template<typename... Args>
+	void setParamtersDefault(Args&&... args)
+	{
+		static_assert(sizeof...(ParamTypes) >= sizeof...(args), "is to many args");
+		paramters = std::make_tuple(std::forward<Args>(args)...);
+	}
+
+	//可以接受引用类型, 需要使用 <> 指定类型
+	template<typename... Args>
+	void setParamters(Args... args)
+	{
+		static_assert(sizeof...(ParamTypes) >= sizeof...(args), "is to many args");
+		paramters = std::tuple<Args...>(args...);
+	}
+
+	//从头开始偏移参数
+	template<size_t ArgsSize>
+	decltype(auto) CastParamters()
+	{
+		constexpr size_t index = sizeof...(ParamTypes) - ArgsSize;	//得到已经填充了多少个参数
+		return std::any_cast<TMakeTupleForwardOffset<index, ParamTypes...>>(paramters);
+	}
+
+	//从尾开始偏移参数
+	template<size_t ArgsSize>
+	decltype(auto) BackCastParamters()
+	{
+		constexpr size_t index = sizeof...(ParamTypes) - ArgsSize;	//得到已经填充了多少个参数
+		return std::any_cast<TMakeTupleOffset<index, ParamTypes...>>(paramters);
 	}
 
 	virtual bool IsVaild()
 	{
 		return true;
 	}
+
+protected:
+	std::any paramters;
 };
 
-//因为 std::get 返回的类型是左值，转换不了右值，所以不支持右值引用类型，支持万能引用
-template<typename FuncType, typename... VarTypes>
+
+template<typename FuncType>
 class TStaticDelegateInstance;
 
-template<typename InRetValType, typename... ParamTypes, typename... VarTypes>
-class TStaticDelegateInstance<InRetValType(ParamTypes...), VarTypes...> : public TBaseDelegateInstance<InRetValType(ParamTypes...)>
+template<typename InRetValType, typename... ParamTypes>
+class TStaticDelegateInstance<InRetValType(ParamTypes...)> : public TBaseDelegateInstance<InRetValType(ParamTypes...)>
 {
 	template<typename T>
 	friend class TBaseDelegate;
 
 public:
+	using Super = TBaseDelegateInstance<InRetValType(ParamTypes...)>;
 	using RetValType = InRetValType;
 	using FuncType = InRetValType(ParamTypes...);
 	using FuncTypePtr = InRetValType(*)(ParamTypes...);
-	using TupleType = std::tuple<VarTypes...>;
 	using TupleSequence = std::index_sequence_for<ParamTypes...>;
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
-	explicit TStaticDelegateInstance(FuncTypePtr InFunc, VarTypes... Vars)
-		: Functor(InFunc)
-		, paramters(std::make_tuple(Vars...))		//函数使用引用参数会报错，因为内部调用 std::decay (朽化)，移除了引用类型
+	explicit TStaticDelegateInstance(FuncTypePtr InFunc)
+		: Super()
+		, Functor(InFunc)
 	{
-
 	}
 
 public:
@@ -59,28 +98,22 @@ public:
 		return true;
 	}
 
-	InRetValType Execute(ParamTypes... args) override final
+	InRetValType Execute(std::tuple<ParamTypes...>&& argsTuple) override final
 	{
-		//std::cout << "Is Base" << std::endl;
+		return std::apply(Functor, std::move(argsTuple));
 		//return _CallFunc(TupleSequence{});
-		return InvokeAfter(*Functor, paramters, args...);
-		//return InRetValType();
 	}
 
 private:
 	template<size_t... Index>
 	InRetValType _CallFunc(std::index_sequence<Index...>) const
 	{
-		//std::cout << "Test Type: ";
-		//std::initializer_list<char> { (std::cout << typeid(std::get<Index>(paramters)).name() << " , ", 0)... };
-		//std::cout << std::endl;
-
-		return (*Functor)(std::get<Index>(paramters)...);
+		return (*Functor)(std::get<Index>(this->paramters)...);
 	}
 
 	FuncTypePtr Functor;
-	TupleType paramters;
 };
+
 
 template<bool bConst, typename UserClass, typename FuncType>
 class TMemberFuncDelegateInstance;
@@ -92,18 +125,16 @@ class TMemberFuncDelegateInstance<bConst, UserClass, InRetValType(ParamTypes...)
 	friend class TBaseDelegate;
 
 public:
+	using Super = TBaseDelegateInstance<InRetValType(ParamTypes...)>;
 	using RetValType = InRetValType;
 	using FuncType = InRetValType(ParamTypes...);
 	using FuncTypePtr = typename TMemberFuncPtr<bConst, UserClass, FuncType>::Type;
-	using TupleType = std::tuple<ParamTypes...>;
 	using TupleSequence = std::index_sequence_for<ParamTypes...>;
 
 	//防止隐式转换，需要函数和参数类型一致
-	explicit TMemberFuncDelegateInstance(UserClass* InUserObject, FuncTypePtr InFunc, ParamTypes... Params)
+	explicit TMemberFuncDelegateInstance(UserClass* InUserObject, FuncTypePtr InFunc)
 		: Functor(InFunc)
 		, UserObject(InUserObject)
-		//, paramters(std::make_tuple(Params...))		//函数使用引用参数会报错，因为内部调用 std::decay (朽化)，移除了引用类型
-		, paramters(std::forward_as_tuple(Params...))	//函数使用引用参数不报错
 	{
 		//assert(InUserObject != nullptr && InFunc != nullptr, "InUserObject or InFunc is Null");
 	}
@@ -115,32 +146,27 @@ public:
 		return true;
 	}
 
-	InRetValType Execute() override final
+	InRetValType Execute(std::tuple<ParamTypes...>&& argsTuple) override final
 	{
-		WARNING_LOG("Is MemberFunc");
 		if (Functor == nullptr)
 		{
 			ERROR_LOG("TMemberFuncDelegateInstance Execute Is Error");
 			return InRetValType();
 		}
 
-		return _CallFunc(TupleSequence{});
+		return _CallFunc(argsTuple, TupleSequence{});
 	}
 
 private:
-	template<size_t... Index>
-	InRetValType _CallFunc(std::index_sequence<Index...>) const
+	template<typename TupIns, size_t... Index>
+	InRetValType _CallFunc(TupIns&& tupIns, std::index_sequence<Index...>) const
 	{
-		//std::cout << "Test Type: ";
-		//std::initializer_list<char> { (std::cout << typeid(std::get<Index>(paramters)).name() << " , ", 0)... };
-		//std::cout << std::endl;
-
-		return (UserObject->*Functor)(std::get<Index>(paramters)...);
+		//return (UserObject->*Functor)(std::get<Index>(tupIns)...);
+		return std::invoke(Functor, UserObject, std::get<Index>(tupIns)...);
 	}
 
 	UserClass* UserObject;
 	FuncTypePtr Functor;
-	TupleType paramters;
 };
 
 
@@ -162,13 +188,11 @@ public:
 	//防止隐式转换，需要函数和参数类型一致
 	explicit TLambdaDelegateInstance(const FunctorType& InFunctor, ParamTypes... Params)
 		: Functor(InFunctor)
-		, paramters(std::forward_as_tuple(Params...))
 	{
 	}
 
 	explicit TLambdaDelegateInstance(FunctorType&& InFunctor, ParamTypes... Params)
 		: Functor(InFunctor)
-		, paramters(std::forward_as_tuple(Params...))
 	{
 	}
 
@@ -178,22 +202,20 @@ public:
 		return true;
 	}
 
-	InRetValType Execute() override final
+	InRetValType Execute(std::tuple<ParamTypes...>&& argsTuple) override final
 	{
-		WARNING_LOG("Is Lambda Call");
-		return _CallFunc(TupleSequence{});
+		return _CallFunc(argsTuple, TupleSequence{});
 	}
 
 private:
-	template<size_t... Index>
-	InRetValType _CallFunc(std::index_sequence<Index...>)
+	template<typename TupIns, size_t... Index>
+	InRetValType _CallFunc(TupIns&& tupIns, std::index_sequence<Index...>) const
 	{
-		return Functor(std::get<Index>(paramters)...);
+		return Functor(std::get<Index>(tupIns)...);
 	}
 
 	//使用 mutable 主要是为了 Lambda 可以被绑定和执行
 	//不想把 Functor 的方法直接给委托子对象
 	//这样在常函数的情况下保持 const 的传递性，因为绑定不影响复制的可替换性
 	mutable typename std::remove_const_t<FunctorType> Functor;
-	TupleType paramters;
 };

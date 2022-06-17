@@ -37,6 +37,7 @@ int F4(int a, int& b)
 
 int main()
 {
+#if 0
 	int a = 10;
 	int& b = a;
 	using FType = decltype(F3);
@@ -64,6 +65,38 @@ int main()
 	D3.setParamters<int&, char*>(b, &p);
 	D3.ExcuteAfter(a, p);
 	ERROR_LOG(b, p);
+#else
+	int a = 10;
+	int& b = a;
+	using FType = decltype(F3);
+	TDelegate<FType> D1 = TDelegate<FType>::CreateStatic(F3, a);
+	auto D2 = D1;
+	D1.setParamters<int, int&>(a, b);
+	int c = D1.Excute();
+	DEBUG_LOG(a, b, c);
+
+	a = 20;
+	D1 = TDelegate<FType>::CreateStatic(F4);
+	c = D1.ExcuteEx<int, int&>(a, b);
+	DEBUG_LOG(a, b, c);
+	
+	WARNING_LOG("*********");
+	D1 = TDelegate<FType>::CreateStatic(F3);
+	D1.setParamters<int&>(b);
+	DEBUG_LOG(D1.ExcuteAfter(a));
+	DEBUG_LOG(D1.ExcuteAfterEx<int>(a));
+	
+	WARNING_LOG("*********");
+	char p = 's';
+	using FType2 = decltype(F1);
+	TDelegate<FType2> D3 = TDelegate<FType2>::CreateStatic(F1);
+	D3.setParamters<int&, char*>(b, &p);
+	D3.ExcuteAfter(a, p);
+	ERROR_LOG(b, p);
+
+#endif
+
+
 
 	system("pause");
 	return 0;
