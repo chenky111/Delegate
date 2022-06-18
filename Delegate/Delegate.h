@@ -21,14 +21,6 @@ public:
 	using Super::Super;
 
 public:
-	//template<typename... VarTypes>
-	//static TDelegate CreateBase(FuncType func, VarTypes&&... Vars)
-	//{
-	//	TDelegate result;
-	//	result.ins = std::make_shared<TStaticDelegateInstance<FuncType>>(func, std::forward<VarTypes>(Vars)...);
-	//	return result;
-	//}
-
 	//2种方法效果都一样
 #if 0
 	template<typename... Args>
@@ -43,11 +35,10 @@ public:
 	template<typename... Args>
 	static TDelegate CreateBase(typename TDefineType<InRetValType(*)(ParamTypes...)>::Type InFunc, Args&&... args)
 	{
-		return TDelegate();
-		//TDelegate result;
-		//result.ins = std::make_shared<TStaticDelegateInstance<FuncType>>(InFunc);
-		//result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
-		//return result;
+		TDelegate result;
+		result.ins = std::make_shared<TStaticDelegateInstance<FuncType>>(InFunc);
+		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
+		return result;
 	}
 #endif
 

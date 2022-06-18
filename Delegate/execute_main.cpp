@@ -35,6 +35,14 @@ int F4(int a, int& b)
 	return a + b;
 }
 
+class Ca
+{
+public:
+	void f1() { DEBUG_LOG("f1 call"); }
+	void f2(int a) { DEBUG_LOG("f1 cal: ", a); };
+	//int f3()
+};
+
 int main()
 {
 #if 0
@@ -65,7 +73,8 @@ int main()
 	D3.setParamters<int&, char*>(b, &p);
 	D3.ExcuteAfter(a, p);
 	ERROR_LOG(b, p);
-#else
+
+#elseif 0
 	int a = 10;
 	int& b = a;
 	using FType = decltype(F3);
@@ -93,6 +102,12 @@ int main()
 	D3.setParamters<int&, char*>(b, &p);
 	D3.ExcuteAfter(a, p);
 	ERROR_LOG(b, p);
+
+#else
+	Ca a;
+	using FType1 = void();
+	auto D1 = TDelegate<FType1>::CreateMemberFunc(&a, &Ca::f1);
+	D1.Excute();
 
 #endif
 

@@ -95,7 +95,7 @@ struct TTupleForwardOffset<0, std::tuple<Params...>, T, Args...> : std::true_typ
 * 偏移参数后的 tuple 类型(前面的参数)
 * @index: 必须为 [0 ~ N-1]
 */
-template<size_t N, typename T, typename... Args>
+template<size_t N, typename T = void, typename... Args>
 struct TTupleForwardOffsetUtil : TTupleForwardOffset<N, std::tuple<>, T, Args...> {};
 
 /*
