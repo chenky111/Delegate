@@ -39,7 +39,10 @@ class Ca
 {
 public:
 	void f1() { DEBUG_LOG("f1 call"); }
-	void f2(int a) { DEBUG_LOG("f1 cal: ", a); };
+	void f2(int a) { DEBUG_LOG("f2 cal: ", a); };
+	void f3(int&& a) { DEBUG_LOG("f3 cal: ", a); };
+	void f4(int& a, int&& b) { DEBUG_LOG("f4 cal: ", a, b); };
+	void f5(int a, int& b, int&& c) { DEBUG_LOG("f5 cal: ", a, b, c); };
 	//int f3()
 };
 
@@ -105,10 +108,29 @@ int main()
 
 #else
 	Ca a;
+	int ia = 30;
+	int& ib = ia;
+
 	using FType1 = void();
 	auto D1 = TDelegate<FType1>::CreateMemberFunc(&a, &Ca::f1);
 	D1.Excute();
 
+	using FType2 = void(int);
+	auto D2 = TDelegate<FType2>::CreateMemberFunc(&a, &Ca::f2);
+	D2.Excute(20);
+
+	using FType3 = void(int&&);
+	auto D3 = TDelegate<FType3>::CreateMemberFunc(&a, &Ca::f3);
+	D3.ExcuteEx<int&&>(20);
+
+	using FType4 = void(int&, int&&);
+	auto D4 = TDelegate<FType4>::CreateMemberFunc(&a, &Ca::f4);
+	D4.setParamters<int&>(ia);
+	D4.ExcuteEx<int&&>(20);
+
+	using FType5 = void(int, int&, int&&);
+	auto D5 = TDelegate<FType5>::CreateMemberFunc(&a, &Ca::f5, 90);
+	D5.ExcuteEx<int&, int&&>(ia, 200);
 #endif
 
 

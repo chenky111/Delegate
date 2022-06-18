@@ -82,6 +82,7 @@ public:
 	using FuncType = InRetValType(ParamTypes...);
 	using FuncTypePtr = InRetValType(*)(ParamTypes...);
 	using TupleSequence = std::index_sequence_for<ParamTypes...>;
+	using TupleType = std::tuple<ParamTypes...>;
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
@@ -98,7 +99,7 @@ public:
 		return true;
 	}
 
-	InRetValType Execute(std::tuple<ParamTypes...>&& argsTuple) override final
+	InRetValType Execute(TupleType&& argsTuple) override final
 	{
 		return std::apply(Functor, std::move(argsTuple));
 		//return _CallFunc(TupleSequence{});
@@ -106,9 +107,9 @@ public:
 
 private:
 	template<size_t... Index>
-	InRetValType _CallFunc(std::index_sequence<Index...>) const
+	InRetValType _CallFunc(TupleType&& tupIns, std::index_sequence<Index...>) const
 	{
-		return (*Functor)(std::get<Index>(this->paramters)...);
+		return (*Functor)(std::forward<ParamTypes>(std::get<Index>(tupIns))...);
 	}
 
 	FuncTypePtr Functor;
@@ -130,7 +131,9 @@ public:
 	using FuncType = InRetValType(ParamTypes...);
 	using FuncTypePtr = typename TMemberFuncPtr<bConst, UserClass, FuncType>::Type;
 	using TupleSequence = std::index_sequence_for<ParamTypes...>;
+	using TupleType = std::tuple<ParamTypes...>;
 
+public:
 	//防止隐式转换，需要函数和参数类型一致
 	explicit TMemberFuncDelegateInstance(UserClass* InUserObject, FuncTypePtr InFunc)
 		: Functor(InFunc)
@@ -146,7 +149,7 @@ public:
 		return true;
 	}
 
-	InRetValType Execute(std::tuple<ParamTypes...>&& argsTuple) override final
+	InRetValType Execute(TupleType&& argsTuple) override final
 	{
 		if (Functor == nullptr)
 		{
@@ -154,15 +157,15 @@ public:
 			return InRetValType();
 		}
 
-		return _CallFunc(argsTuple, TupleSequence{});
+		return _CallFunc(std::forward<TupleType>(argsTuple), TupleSequence{});
 	}
 
 private:
-	template<typename TupIns, size_t... Index>
-	InRetValType _CallFunc(TupIns&& tupIns, std::index_sequence<Index...>) const
+	template<size_t... Index>
+	InRetValType _CallFunc(TupleType&& tupIns, std::index_sequence<Index...>) const
 	{
-		//return (UserObject->*Functor)(std::get<Index>(tupIns)...);
-		return std::invoke(Functor, UserObject, std::get<Index>(tupIns)...);
+		return (UserObject->*Functor)(std::forward<ParamTypes>(std::get<Index>(tupIns))...);
+		//return std::invoke(Functor, UserObject, std::get<Index>(tupIns)...);
 	}
 
 	UserClass* UserObject;
@@ -184,7 +187,9 @@ public:
 	using FuncType = InRetValType(ParamTypes...);
 	using TupleType = std::tuple<ParamTypes...>;
 	using TupleSequence = std::index_sequence_for<ParamTypes...>;
+	using TupleType = std::tuple<ParamTypes...>;
 
+public:
 	//防止隐式转换，需要函数和参数类型一致
 	explicit TLambdaDelegateInstance(const FunctorType& InFunctor, ParamTypes... Params)
 		: Functor(InFunctor)
@@ -202,16 +207,16 @@ public:
 		return true;
 	}
 
-	InRetValType Execute(std::tuple<ParamTypes...>&& argsTuple) override final
+	InRetValType Execute(TupleType&& argsTuple) override final
 	{
 		return _CallFunc(argsTuple, TupleSequence{});
 	}
 
 private:
-	template<typename TupIns, size_t... Index>
-	InRetValType _CallFunc(TupIns&& tupIns, std::index_sequence<Index...>) const
+	template<size_t... Index>
+	InRetValType _CallFunc(TupleType&& tupIns, std::index_sequence<Index...>) const
 	{
-		return Functor(std::get<Index>(tupIns)...);
+		return Functor(std::forward<ParamTypes>(std::get<Index>(tupIns))...);
 	}
 
 	//使用 mutable 主要是为了 Lambda 可以被绑定和执行

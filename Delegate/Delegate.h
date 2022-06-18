@@ -112,7 +112,7 @@ public:
 		return InRetValType();
 	}
 
-	//参数无法转换为引用类型的模板
+	//执行函数, 注意:参数无法转换成引用类型
 	template<typename... Args>
 	InRetValType Excute(Args&&... args)
 	{
@@ -121,9 +121,9 @@ public:
 
 	//可以接受引用类型, 需要使用 <> 指定类型
 	template<typename... Args>
-	InRetValType ExcuteEx(const Args&... args)
+	InRetValType ExcuteEx(Args... args)
 	{
-		return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::tuple<Args...>(args...)));
+		return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::tuple<Args...>(static_cast<Args>(args)...)));
 	}
 
 	//参数置后再执行
