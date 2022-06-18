@@ -165,7 +165,7 @@ private:
 	InRetValType _CallFunc(TupleType&& tupIns, std::index_sequence<Index...>) const
 	{
 		return (UserObject->*Functor)(std::forward<ParamTypes>(std::get<Index>(tupIns))...);
-		//return std::invoke(Functor, UserObject, std::get<Index>(tupIns)...);
+		//return std::invoke(Functor, UserObject, std::forward<ParamTypes>(std::get<Index>(tupIns))...);
 	}
 
 	UserClass* UserObject;
