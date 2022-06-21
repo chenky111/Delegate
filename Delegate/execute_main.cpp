@@ -150,10 +150,26 @@ int main()
 	D1.Excute();
 
 	char b = 'c';
-	auto lam2 = [](int a, char& b) { DEBUG_LOG("lam2", a, b); };
+	auto lam2 = [](int a, char& b) { DEBUG_LOG("lam2", a, b); b = 'g'; };
 	using FType2 = void(int, char&);
 	auto D2 = TDelegate<FType2>::CreateLambda(lam2, 20);
 	D2.ExcuteEx<char&>(b);
+	DEBUG_LOG(b);
+
+	double f = 58.f;
+	auto lam3 = [&f](int a) { DEBUG_LOG("lam3", a); f = 98.f; };
+	using FType3 = void(int);
+	auto D3 = TDelegate<FType3>::CreateLambda(lam3, 20);
+	D3.Excute();
+	DEBUG_LOG(f);
+
+	int ib = 50;
+	using FType4 = double(int, char);
+	auto D4 = TDelegate<FType4>::CreateLambda([&f](int a, const int b) {
+		f = 202.22f;
+		return f;
+	}, 20);
+	DEBUG_LOG(D4.ExcuteEx<const int>(ib));
 
 #endif
 
