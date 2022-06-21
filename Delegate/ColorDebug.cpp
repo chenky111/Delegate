@@ -28,7 +28,6 @@ void AppendLog(std::string& str, const char& value)
 	str += value;
 }
 
-
 std::string GetLogFileName(const std::string& fileName)
 {
 	const char* finder = "\\";

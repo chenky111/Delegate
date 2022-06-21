@@ -191,13 +191,13 @@ public:
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
-	explicit TLambdaDelegateInstance(const FunctorType& InFunctor, ParamTypes... Params)
+	explicit TLambdaDelegateInstance(const FunctorType& InFunctor)
 		: Functor(InFunctor)
 	{
 	}
 
-	explicit TLambdaDelegateInstance(FunctorType&& InFunctor, ParamTypes... Params)
-		: Functor(InFunctor)
+	explicit TLambdaDelegateInstance(FunctorType&& InFunctor)
+		: Functor(std::move(InFunctor))
 	{
 	}
 
@@ -209,7 +209,7 @@ public:
 
 	InRetValType Execute(TupleType&& argsTuple) override final
 	{
-		return _CallFunc(argsTuple, TupleSequence{});
+		return _CallFunc(std::forward<TupleType>(argsTuple), TupleSequence{});
 	}
 
 private:

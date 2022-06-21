@@ -43,7 +43,8 @@ public:
 	void f3(int&& a) { DEBUG_LOG("f3 cal: ", a); };
 	void f4(int& a, int&& b) { DEBUG_LOG("f4 cal: ", a, b); };
 	void f5(int a, int& b, int&& c) { DEBUG_LOG("f5 cal: ", a, b, c); };
-	//int f3()
+	int f6(int a, double& b, char c, const std::string& str) const { DEBUG_LOG("f6 cal: ", a, b, c, str); return a + 300; }
+	static int f7(int a, const char& b) { DEBUG_LOG("f7 cal", a, b); return a % 20; }
 };
 
 int main()
@@ -106,10 +107,11 @@ int main()
 	D3.ExcuteAfter(a, p);
 	ERROR_LOG(b, p);
 
-#else
+#elseif 0
 	Ca a;
 	int ia = 30;
 	int& ib = ia;
+	double ic = 20.f;
 
 	using FType1 = void();
 	auto D1 = TDelegate<FType1>::CreateMemberFunc(&a, &Ca::f1);
@@ -131,6 +133,28 @@ int main()
 	using FType5 = void(int, int&, int&&);
 	auto D5 = TDelegate<FType5>::CreateMemberFunc(&a, &Ca::f5, 90);
 	D5.ExcuteEx<int&, int&&>(ia, 200);
+
+	using FType6 = int(int, double&, char, const std::string&);
+	auto D6 = TDelegate<FType6>::CreateMemberFunc(&a, &Ca::f6);
+	D6.setParamters<int, double&>(ia, ic);
+	WARNING_LOG(D6.ExcuteEx<char, std::string>('a', "str"));
+
+	using FType7 = int(int, const char&);
+	auto D7 = TDelegate<FType7>::CreateStatic(&Ca::f7, ia);
+	WARNING_LOG(D7.ExcuteEx<const char&>('s'));
+
+#else
+	auto lam1 = []() { DEBUG_LOG("lam"); };
+	using FType1 = void(void);
+	auto D1 = TDelegate<FType1>::CreateLambda(lam1);
+	D1.Excute();
+
+	char b = 'c';
+	auto lam2 = [](int a, char& b) { DEBUG_LOG("lam2", a, b); };
+	using FType2 = void(int, char&);
+	auto D2 = TDelegate<FType2>::CreateLambda(lam2, 20);
+	D2.ExcuteEx<char&>(b);
+
 #endif
 
 
