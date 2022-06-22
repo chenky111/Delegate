@@ -53,8 +53,7 @@ public:
 	template<size_t ArgsSize>
 	decltype(auto) BackCastParamters()
 	{
-		constexpr size_t index = sizeof...(ParamTypes) - ArgsSize;	//得到已经填充了多少个参数
-		return std::any_cast<TMakeTupleOffset<index, ParamTypes...>>(paramters);
+		return std::any_cast<TMakeTupleOffset<ArgsSize, ParamTypes...>>(paramters);
 	}
 
 	virtual bool IsVaild()

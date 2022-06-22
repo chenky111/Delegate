@@ -164,11 +164,11 @@ public:
 
 	//参数置后再执行, 可以接受引用类型, 需要使用 <> 指定类型
 	template<typename... Args>
-	InRetValType ExcuteAfterEx(const Args&... args)
+	InRetValType ExcuteAfterEx(Args... args)
 	{
 		try
 		{
-			return this->ins->Execute((std::tuple_cat(std::tuple<Args...>(args...), this->ins->BackCastParamters<sizeof...(Args)>())));
+			return this->ins->Execute((std::tuple_cat(std::tuple<Args...>(static_cast<Args>(args)...), this->ins->BackCastParamters<sizeof...(Args)>())));
 		}
 		catch (const std::exception& e)
 		{

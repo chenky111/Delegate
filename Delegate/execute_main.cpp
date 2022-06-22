@@ -170,13 +170,17 @@ int main()
 		return f;
 	}, 20);
 	DEBUG_LOG(D4.ExcuteEx<const int>(ib));
-	//D4.setParamters<const int>(99);
-	//DEBUG_LOG(D4.ExcuteAfter(88));
+	D4.setParamters<const int>(99);
+	DEBUG_LOG(D4.ExcuteAfter(88));
 
 	using FType5 = void(const int, const char&, const int&);
 	auto D5 = TDelegate<FType5>::CreateLambda([](const int a, const char& b, const int& c) { DEBUG_LOG("lam s"); });
 	D5.setParamters<const int, const char&>(20, 's');
 	D5.ExcuteEx<const int&>(90);
+
+	D5 = TDelegate<FType5>::CreateLambda([](const int a, const char& b, const int& c) { DEBUG_LOG("lam ss"); });
+	D5.setParamters<const char&, const int&>('p', 232);
+	D5.ExcuteAfter(20);
 
 #endif
 
