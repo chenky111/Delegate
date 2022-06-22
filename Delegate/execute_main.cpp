@@ -164,12 +164,19 @@ int main()
 	DEBUG_LOG(f);
 
 	int ib = 50;
-	using FType4 = double(int, char);
+	using FType4 = double(int, const int);
 	auto D4 = TDelegate<FType4>::CreateLambda([&f](int a, const int b) {
 		f = 202.22f;
 		return f;
 	}, 20);
 	DEBUG_LOG(D4.ExcuteEx<const int>(ib));
+	//D4.setParamters<const int>(99);
+	//DEBUG_LOG(D4.ExcuteAfter(88));
+
+	using FType5 = void(const int, const char&, const int&);
+	auto D5 = TDelegate<FType5>::CreateLambda([](const int a, const char& b, const int& c) { DEBUG_LOG("lam s"); });
+	D5.setParamters<const int, const char&>(20, 's');
+	D5.ExcuteEx<const int&>(90);
 
 #endif
 

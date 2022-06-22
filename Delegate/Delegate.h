@@ -101,7 +101,12 @@ public:
 	template<typename... Args>
 	void setParamters(const Args&... args)
 	{
-		this->ins->setParamters<Args...>(args...);
+		//移除 const
+		//例如使用 void(const int, cosnt int&) -> void(int, const int&) 时
+		//这样就能够匹配 any_cast，且不影响参数传递使用
+		
+		//this->ins->setParamters<Args...>(args...);
+		this->ins->setParamters<std::remove_cv_t<Args>...>(args...);
 	}
 
 	InRetValType ExcuteIfSave()
@@ -116,28 +121,60 @@ public:
 	template<typename... Args>
 	InRetValType Excute(Args&&... args)
 	{
-		return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::make_tuple(std::forward<Args>(args)...)));
+		try
+		{
+			return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::make_tuple(std::forward<Args>(args)...)));
+		}
+		catch (const std::exception& e)
+		{
+			ERROR_LOG("Execute Error:", e.what());
+			return InRetValType();
+		}
 	}
 
 	//可以接受引用类型, 需要使用 <> 指定类型
 	template<typename... Args>
 	InRetValType ExcuteEx(Args... args)
 	{
-		return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::tuple<Args...>(static_cast<Args>(args)...)));
+		try
+		{
+			return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::tuple<Args...>(static_cast<Args>(args)...)));
+		}
+		catch (const std::exception& e)
+		{
+			ERROR_LOG("Execute Error:", e.what());
+			return InRetValType();
+		}
 	}
 
 	//参数置后再执行
 	template<typename... Args>
 	InRetValType ExcuteAfter(Args&&... args)
 	{
-		return this->ins->Execute(std::tuple_cat(std::make_tuple(std::forward<Args>(args)...), this->ins->BackCastParamters<sizeof...(Args)>()));
+		try
+		{
+			return this->ins->Execute(std::tuple_cat(std::make_tuple(std::forward<Args>(args)...), this->ins->BackCastParamters<sizeof...(Args)>()));
+		}
+		catch (const std::exception& e)
+		{
+			ERROR_LOG("Execute Error:", e.what());
+			return InRetValType();
+		}
 	}
 
 	//参数置后再执行, 可以接受引用类型, 需要使用 <> 指定类型
 	template<typename... Args>
 	InRetValType ExcuteAfterEx(const Args&... args)
 	{
-		return this->ins->Execute((std::tuple_cat(std::tuple<Args...>(args...), this->ins->BackCastParamters<sizeof...(Args)>())));
+		try
+		{
+			return this->ins->Execute((std::tuple_cat(std::tuple<Args...>(args...), this->ins->BackCastParamters<sizeof...(Args)>())));
+		}
+		catch (const std::exception& e)
+		{
+			ERROR_LOG("Execute Error:", e.what());
+			return InRetValType();
+		}
 	}
 };
 

@@ -4,6 +4,7 @@
 #include <any>
 #include <tuple>
 #include <iostream>
+#include <stdexcept>
 
 using BaseFuncType = void(*)(void);
 

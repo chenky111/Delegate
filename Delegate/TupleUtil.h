@@ -41,6 +41,9 @@ using TMakeTupleOffset = typename std::disjunction<
 	default_type<std::tuple<>>
 >::type;
 
+//去除 const，不包括 const T&
+template<size_t Index, typename... Params>
+using TMakeTupleOffset_NoConst = TMakeTupleOffset<Index, std::remove_cv_t<Params>...>;
 
 /*
 * 使用 函数类型 来创建偏移元组参数类型
@@ -110,6 +113,10 @@ using TMakeTupleForwardOffset = typename std::disjunction<
 	std::conditional_t<(sizeof...(Params) >= 1 && sizeof...(Params) > Index), TTupleForwardOffsetUtil<Index, Params...>, std::false_type>,
 	default_type<std::tuple<>>
 >::type;
+
+//去除 const，不包括 const T&
+template<size_t Index, typename... Params>
+using TMakeTupleForwardOffset_NoConst = TMakeTupleForwardOffset<Index, std::remove_cv_t<Params>...>;
 
 /*=====================================================================================================*/
 
