@@ -78,7 +78,7 @@ int main()
 		auto l = TDelegate<F>::CreateLambda(lm, 90);
 		auto l2 = std::move(l);
 		l2.setParamters(88);
-		//l.Excute();
+		//l.Excute(); //err
 		l2.Excute();
 	}
 
