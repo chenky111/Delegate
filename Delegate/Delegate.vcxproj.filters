@@ -41,9 +41,6 @@
     <ClInclude Include="DelegateInstance.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="newDelegate.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ColorDebug.h">
       <Filter>头文件</Filter>
     </ClInclude>

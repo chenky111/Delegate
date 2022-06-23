@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <memory>
 #include "Delegate.h"
-#include "newDelegate.h"
 
 using namespace std;
 
@@ -181,6 +180,13 @@ int main()
 	D5 = TDelegate<FType5>::CreateLambda([](const int a, const char& b, const int& c) { DEBUG_LOG("lam ss"); });
 	D5.setParamters<const char&, const int&>('p', 232);
 	D5.ExcuteAfter(20);
+
+	using FType6 = const int(const int a, const char b, int c, const char* d);
+	auto D6 = TDelegate<FType6>::CreateLambda([](const int a, const char b, int c, const char* d) {
+		DEBUG_LOG("lam sss");
+		return a + c;
+	}, 10, 'f', 35, "dow");
+	DEBUG_LOG(D6.Excute());
 
 #endif
 

@@ -151,7 +151,6 @@
     <ClInclude Include="Common.h" />
     <ClInclude Include="Delegate.h" />
     <ClInclude Include="DelegateInstance.h" />
-    <ClInclude Include="newDelegate.h" />
     <ClInclude Include="TupleUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
