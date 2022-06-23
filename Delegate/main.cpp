@@ -1,6 +1,3 @@
-#include <iostream>
-#include <stdlib.h>
-#include <memory>
 #include "Delegate.h"
 using namespace std;
 

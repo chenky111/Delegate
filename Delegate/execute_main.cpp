@@ -1,6 +1,3 @@
-#include <iostream>
-#include <stdlib.h>
-#include <memory>
 #include "Delegate.h"
 
 using namespace std;
@@ -46,7 +43,7 @@ public:
 	static int f7(int a, const char& b) { DEBUG_LOG("f7 cal", a, b); return a % 20; }
 };
 
-int main()
+int main1()
 {
 #if 0
 	int a = 10;

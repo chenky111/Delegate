@@ -117,19 +117,28 @@ public:
 		return InRetValType();
 	}
 
+	bool IsSave()
+	{
+		return this->ins.use_count() > 0 && this->ins->IsVaild();
+	}
+
 	//执行函数, 注意:参数无法转换成引用类型
 	template<typename... Args>
 	InRetValType Excute(Args&&... args)
 	{
 		try
 		{
-			return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::make_tuple(std::forward<Args>(args)...)));
+			if(IsSave())
+				return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::make_tuple(std::forward<Args>(args)...)));
+			else
+				ERROR_LOG("Execute is not save");
 		}
 		catch (const std::exception& e)
 		{
 			ERROR_LOG("Execute Error:", e.what());
-			return InRetValType();
 		}
+		
+		return InRetValType();
 	}
 
 	//可以接受引用类型, 需要使用 <> 指定类型
@@ -138,13 +147,17 @@ public:
 	{
 		try
 		{
-			return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::tuple<Args...>(static_cast<Args>(args)...)));
+			if(IsSave())
+				return this->ins->Execute(std::tuple_cat(this->ins->CastParamters<sizeof...(Args)>(), std::tuple<Args...>(static_cast<Args>(args)...)));
+			else
+				ERROR_LOG("Execute is not save");
 		}
 		catch (const std::exception& e)
 		{
 			ERROR_LOG("Execute Error:", e.what());
-			return InRetValType();
 		}
+
+		return InRetValType();
 	}
 
 	//参数置后再执行
@@ -153,13 +166,17 @@ public:
 	{
 		try
 		{
-			return this->ins->Execute(std::tuple_cat(std::make_tuple(std::forward<Args>(args)...), this->ins->BackCastParamters<sizeof...(Args)>()));
+			if(IsSave())
+				return this->ins->Execute(std::tuple_cat(std::make_tuple(std::forward<Args>(args)...), this->ins->BackCastParamters<sizeof...(Args)>()));
+			else
+				ERROR_LOG("Execute is not save");
 		}
 		catch (const std::exception& e)
 		{
 			ERROR_LOG("Execute Error:", e.what());
-			return InRetValType();
 		}
+
+		return InRetValType();
 	}
 
 	//参数置后再执行, 可以接受引用类型, 需要使用 <> 指定类型
@@ -168,13 +185,17 @@ public:
 	{
 		try
 		{
-			return this->ins->Execute((std::tuple_cat(std::tuple<Args...>(static_cast<Args>(args)...), this->ins->BackCastParamters<sizeof...(Args)>())));
+			if (IsSave())
+				return this->ins->Execute((std::tuple_cat(std::tuple<Args...>(static_cast<Args>(args)...), this->ins->BackCastParamters<sizeof...(Args)>())));
+			else
+				ERROR_LOG("Execute is not save");
 		}
 		catch (const std::exception& e)
 		{
 			ERROR_LOG("Execute Error:", e.what());
-			return InRetValType();
 		}
+
+		return InRetValType();
 	}
 };
 

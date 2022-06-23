@@ -1,6 +1,3 @@
-#include <iostream>
-#include <stdlib.h>
-#include <memory>
 #include "Delegate.h"
 using namespace std;
 
@@ -33,7 +30,7 @@ void PT(const T& InTuple, std::index_sequence<Index...>)
 	};
 }
 
-#if 0
+#if 1
 int main()
 {
 
@@ -72,32 +69,18 @@ int main()
 		f2.Excute();
 		f2.Count();
 
-		//测试tuple参数是否一致
-
 	}
 
 
-	// 	int a = 10;
-	// 	int a1 = 20;
-	// 	int a2 = 30;
-	// 	int* b = &a1;
-	// 	int& c = a2;
-	// 	tuple<int&, int*, int> t1 = std::forward_as_tuple(c, b, a);
-	// 	constexpr size_t len = std::tuple_size<decltype(t1)>::value;
-	// 	using SquenceTuple = std::make_index_sequence<len>;
-	// 
-	// 	{
-	// 		auto t2 = std::move(t1);
-	// 
-	// 		std::get<0>(t1) = 51;
-	// 		int* p1 = (std::get<1>(t1));
-	// 		*p1 = 52;
-	// 		std::get<2>(t1) = 53;
-	// 
-	// 		PT(t1, SquenceTuple{});
-	// 		PT(t2, SquenceTuple{});
-	// 	}
-	// 	PT(t1, SquenceTuple{});
+	{
+		auto lm = [](int a) { DEBUG_LOG(a); };
+		using F = void(int);
+		auto l = TDelegate<F>::CreateLambda(lm, 90);
+		auto l2 = std::move(l);
+		l2.setParamters(88);
+		//l.Excute();
+		l2.Excute();
+	}
 
 
 	system("pause");
