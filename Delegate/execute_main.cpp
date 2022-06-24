@@ -49,19 +49,19 @@ int main1()
 	int a = 10;
 	int& b = a;
 	using FType = decltype(F3);
-	TNewDelegate<FType> D1 = TNewDelegate<FType>::CreateStatic(F3, a);
+	TDelegate<FType> D1 = TDelegate<FType>::CreateStatic(F3, a);
 	auto D2 = D1;
 	D1.setParamters<int, int&>(a, b);
 	int c = D1.Excute();
 	DEBUG_LOG(a, b, c);
 
 	a = 20;
-	D1 = TNewDelegate<FType>::CreateStatic(F4);
+	D1 = TDelegate<FType>::CreateStatic(F4);
 	c = D1.ExcuteEx<int, int&>(a, b);
 	DEBUG_LOG(a, b, c);
 
 	WARNING_LOG("*********");
-	D1 = TNewDelegate<FType>::CreateStatic(F3);
+	D1 = TDelegate<FType>::CreateStatic(F3);
 	D1.setParamters<int&>(b);
 	DEBUG_LOG(D1.ExcuteAfter(a));
 	DEBUG_LOG(D1.ExcuteAfterEx<int>(a));
@@ -69,11 +69,11 @@ int main1()
 	WARNING_LOG("*********");
 	char p = 's';
 	using FType2 = decltype(F1);
-	TNewDelegate<FType2> D3 = TNewDelegate<FType2>::CreateStatic(F1);
+	TDelegate<FType2> D3 = TDelegate<FType2>::CreateStatic(F1);
 	D3.setParamters<int&, char*>(b, &p);
 	D3.ExcuteAfter(a, p);
 	ERROR_LOG(b, p);
-
+	
 #elseif 0
 	int a = 10;
 	int& b = a;
@@ -102,7 +102,7 @@ int main1()
 	D3.setParamters<int&, char*>(b, &p);
 	D3.ExcuteAfter(a, p);
 	ERROR_LOG(b, p);
-
+	
 #elseif 0
 	Ca a;
 	int ia = 30;
@@ -138,7 +138,7 @@ int main1()
 	using FType7 = int(int, const char&);
 	auto D7 = TDelegate<FType7>::CreateStatic(&Ca::f7, ia);
 	WARNING_LOG(D7.ExcuteEx<const char&>('s'));
-
+	
 #else
 	auto lam1 = []() { DEBUG_LOG("lam"); };
 	using FType1 = void(void);
@@ -184,7 +184,6 @@ int main1()
 		return a + c;
 	}, 10, 'f', 35, "dow");
 	DEBUG_LOG(D6.Excute());
-
 #endif
 
 

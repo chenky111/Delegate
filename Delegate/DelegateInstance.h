@@ -25,6 +25,11 @@ public:
 		return InRetValType();
 	}
 
+	virtual InRetValType ExecuteP(ParamTypes&&... args)
+	{
+		return InRetValType();
+	}
+
 	//默认, 不能接受引用类型，内部为 std::decay_t 所以会拷贝
 	template<typename... Args>
 	void setParamtersDefault(Args&&... args)
@@ -41,25 +46,41 @@ public:
 		paramters = std::tuple<Args...>(args...);
 	}
 
-	//从头开始偏移参数
+	//从头开始偏移参数, any_cast 会造成额外的一次拷贝
 	template<size_t ArgsSize>
-	decltype(auto) CastParamters()
+	decltype(auto) CastParamters_Any()
 	{
 		constexpr size_t index = sizeof...(ParamTypes) - ArgsSize;	//得到已经填充了多少个参数
 		return std::any_cast<TMakeTupleForwardOffset<index, ParamTypes...>>(paramters);
 	}
 
-	//从尾开始偏移参数
+	//从头开始偏移参数, 不会有额外拷贝
+	template<size_t ArgsSize, size_t index = sizeof...(ParamTypes) - ArgsSize>
+	constexpr const TMakeTupleForwardOffset<index, ParamTypes...>& CastParamters()
+	{
+		return reinterpret_cast<const TMakeTupleForwardOffset<index, ParamTypes...>&>(paramters);
+	}
+
+	//从尾开始偏移参数, any_cast 会造成额外的一次拷贝
 	template<size_t ArgsSize>
-	decltype(auto) BackCastParamters()
+	decltype(auto) BackCastParamters_Any()
 	{
 		return std::any_cast<TMakeTupleOffset<ArgsSize, ParamTypes...>>(paramters);
+	}
+
+	//从尾开始偏移参数, 不会有额外拷贝
+	template<size_t ArgsSize>
+	constexpr const TMakeTupleOffset<ArgsSize, ParamTypes...>& BackCastParamters()
+	{
+		return reinterpret_cast<const TMakeTupleOffset<ArgsSize, ParamTypes...>&>(paramters);
 	}
 
 	virtual bool IsVaild()
 	{
 		return true;
 	}
+
+	constexpr const std::any& GetParamters() { return paramters; }
 
 protected:
 	std::any paramters;
@@ -85,7 +106,7 @@ public:
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
-	explicit TStaticDelegateInstance(FuncTypePtr InFunc)
+	constexpr explicit TStaticDelegateInstance(FuncTypePtr InFunc)
 		: Super()
 		, Functor(InFunc)
 	{
@@ -102,6 +123,11 @@ public:
 	{
 		return std::apply(Functor, std::move(argsTuple));
 		//return _CallFunc(TupleSequence{});
+	}
+
+	InRetValType ExecuteP(ParamTypes&&... args) override final
+	{
+		return (*Functor)(std::forward<ParamTypes>(args)...);
 	}
 
 private:
@@ -134,7 +160,7 @@ public:
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
-	explicit TMemberFuncDelegateInstance(UserClass* InUserObject, FuncTypePtr InFunc)
+	constexpr explicit TMemberFuncDelegateInstance(UserClass* InUserObject, FuncTypePtr InFunc)
 		: Functor(InFunc)
 		, UserObject(InUserObject)
 	{
@@ -190,12 +216,12 @@ public:
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
-	explicit TLambdaDelegateInstance(const FunctorType& InFunctor)
+	constexpr explicit TLambdaDelegateInstance(const FunctorType& InFunctor)
 		: Functor(InFunctor)
 	{
 	}
 
-	explicit TLambdaDelegateInstance(FunctorType&& InFunctor)
+	constexpr explicit TLambdaDelegateInstance(FunctorType&& InFunctor)
 		: Functor(std::move(InFunctor))
 	{
 	}

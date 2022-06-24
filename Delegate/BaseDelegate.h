@@ -42,8 +42,6 @@ public:
 	virtual void CopyForm(const TBaseDelegate& other)
 	{
 		this->ins = other.ins;
-		//*this->ins = *other.ins;
-		//*this = other;
 	}
 
 	virtual void MoveForm(TBaseDelegate&& other)
