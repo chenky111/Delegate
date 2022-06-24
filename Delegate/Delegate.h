@@ -2,9 +2,9 @@
 #include "BaseDelegate.h"
 
 /*
-* 默认参数的函数不能用
-* 后续要把传入的参数改为在 Excute 时传入，而不是在创建时，就绑定参数
-* 如果赋值（绑定）新的函数，那么不会影响之前已经绑定的指针，因为是智能指针，其他保留者还存在引用计数，所以最好就使用弱指针
+* 如果用参数全是引用类型，效率不会和原生 std::bind 差很多
+* 优点: 提前绑定的参数，可以随时替换掉，还可以前后调用
+* 注意：使用引用时，需要确保引用的对象是否有效
 */
 template<typename FuncType>
 class TDelegate;
@@ -70,24 +70,6 @@ public:
 	}
 
 	template<typename TFunc, typename... Args>
-	static void CreateAndCallLambda_Test(TFunc&& InFunc, Args&&... args)
-	{
-		auto f = TLambdaDelegateInstance<FuncType, typename std::decay<TFunc>::type>(std::forward<TFunc>(InFunc));
-		f->setParamtersDefault<Args...>(std::forward<Args>(args)...);
-		f.Execute();
-	}
-
-	template<typename TFunc, typename... Args>
-	static auto CreateLambda_Test(TFunc&& InFunc, Args&&... args)
-		-> decltype(TLambdaDelegateInstance<FuncType, typename std::decay<TFunc>::type>(std::forward<TFunc>(InFunc)))
-	{
-		auto f = TLambdaDelegateInstance<FuncType, typename std::decay<TFunc>::type>(std::forward<TFunc>(InFunc));
-		f->setParamtersDefault<Args...>(std::forward<Args>(args)...);
-		return f;
-		//return TLambdaDelegateInstance<FuncType, typename std::decay<TFunc>::type>(std::forward<TFunc>(InFunc), args...);
-	}
-
-	template<typename TFunc, typename... Args>
 	static TDelegate CreateLambda(TFunc&& InFunc, Args&&... args)
 	{
 		TDelegate result;
@@ -117,7 +99,7 @@ public:
 		return InRetValType();
 	}
 
-	bool IsSave()
+	constexpr bool IsSave()
 	{
 		return this->ins.use_count() > 0 && this->ins->IsVaild();
 	}

@@ -25,7 +25,7 @@ public:
 		return InRetValType();
 	}
 
-	//默认, 不能接受引用类型
+	//默认, 不能接受引用类型，内部为 std::decay_t 所以会拷贝
 	template<typename... Args>
 	void setParamtersDefault(Args&&... args)
 	{
