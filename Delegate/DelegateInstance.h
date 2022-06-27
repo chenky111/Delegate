@@ -20,22 +20,25 @@ public:
 
 public:
 
+#ifndef ExecutTest
 	virtual InRetValType Execute(std::tuple<ParamTypes...>&& argsTuple)
 	{
 		return InRetValType();
 	}
-
-	virtual InRetValType ExecuteP(ParamTypes&&... args)
+#else
+	virtual InRetValType Execute(const ParamTypes&... args)
 	{
 		return InRetValType();
 	}
+#endif
 
-	//默认, 不能接受引用类型，内部为 std::decay_t 所以会拷贝
+	//默认, 不能接受引用类型，使用 std::decay_t 所以会拷贝
 	template<typename... Args>
 	void setParamtersDefault(Args&&... args)
 	{
 		static_assert(sizeof...(ParamTypes) >= sizeof...(args), "is to many args");
 		paramters = std::make_tuple(std::forward<Args>(args)...);
+		//paramters = std::tuple<std::decay_t<Args>...>(std::forward<Args>(args)...);
 	}
 
 	//可以接受引用类型, 需要使用 <> 指定类型
@@ -119,16 +122,20 @@ public:
 		return true;
 	}
 
+#ifndef ExecutTest
 	InRetValType Execute(TupleType&& argsTuple) override final
 	{
 		return std::apply(Functor, std::move(argsTuple));
 		//return _CallFunc(TupleSequence{});
 	}
-
-	InRetValType ExecuteP(ParamTypes&&... args) override final
+#else
+	InRetValType Execute(const ParamTypes&... args) override final
 	{
-		return (*Functor)(std::forward<ParamTypes>(args)...);
+		//return std::apply(Functor, args...);
+		//return _CallFunc(TupleSequence{});
+		return (*Functor)(args...);
 	}
+#endif
 
 private:
 	template<size_t... Index>
@@ -174,6 +181,7 @@ public:
 		return true;
 	}
 
+#ifndef ExecutTest
 	InRetValType Execute(TupleType&& argsTuple) override final
 	{
 		if (Functor == nullptr)
@@ -184,6 +192,18 @@ public:
 
 		return _CallFunc(std::forward<TupleType>(argsTuple), TupleSequence{});
 	}
+#else
+	InRetValType Execute(const ParamTypes&... args) override final
+	{
+		if (Functor == nullptr)
+		{
+			ERROR_LOG("TMemberFuncDelegateInstance Execute Is Error");
+			return InRetValType();
+		}
+
+		return (UserObject->*Functor)(args...);
+	}
+#endif
 
 private:
 	template<size_t... Index>
@@ -232,10 +252,17 @@ public:
 		return true;
 	}
 
+#ifndef ExecutTest
 	InRetValType Execute(TupleType&& argsTuple) override final
 	{
 		return _CallFunc(std::forward<TupleType>(argsTuple), TupleSequence{});
 	}
+#else
+	InRetValType Execute(const ParamTypes&... args) override final
+	{
+		return Functor(args...);
+	}
+#endif
 
 private:
 	template<size_t... Index>

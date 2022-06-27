@@ -43,6 +43,7 @@ public:
 	static int f7(int a, const char& b) { DEBUG_LOG("f7 cal", a, b); return a % 20; }
 };
 
+#if 0
 int main1()
 {
 #if 0
@@ -103,7 +104,7 @@ int main1()
 	D3.ExcuteAfter(a, p);
 	ERROR_LOG(b, p);
 	
-#elseif 0
+#else
 	Ca a;
 	int ia = 30;
 	int& ib = ia;
@@ -111,34 +112,34 @@ int main1()
 
 	using FType1 = void();
 	auto D1 = TDelegate<FType1>::CreateMemberFunc(&a, &Ca::f1);
-	D1.Excute();
+	//D1.Excute();
 
 	using FType2 = void(int);
 	auto D2 = TDelegate<FType2>::CreateMemberFunc(&a, &Ca::f2);
-	D2.Excute(20);
+	//D2.Excute(20);
 
 	using FType3 = void(int&&);
-	auto D3 = TDelegate<FType3>::CreateMemberFunc(&a, &Ca::f3);
-	D3.ExcuteEx<int&&>(20);
+	//auto D3 = TDelegate<FType3>::CreateMemberFunc(&a, &Ca::f3);
+	//D3.ExcuteEx<int&&>(20);
 
-	using FType4 = void(int&, int&&);
-	auto D4 = TDelegate<FType4>::CreateMemberFunc(&a, &Ca::f4);
-	D4.setParamters<int&>(ia);
-	D4.ExcuteEx<int&&>(20);
-
-	using FType5 = void(int, int&, int&&);
-	auto D5 = TDelegate<FType5>::CreateMemberFunc(&a, &Ca::f5, 90);
-	D5.ExcuteEx<int&, int&&>(ia, 200);
-
-	using FType6 = int(int, double&, char, const std::string&);
-	auto D6 = TDelegate<FType6>::CreateMemberFunc(&a, &Ca::f6);
-	D6.setParamters<int, double&>(ia, ic);
-	WARNING_LOG(D6.ExcuteEx<char, std::string>('a', "str"));
-
-	using FType7 = int(int, const char&);
-	auto D7 = TDelegate<FType7>::CreateStatic(&Ca::f7, ia);
-	WARNING_LOG(D7.ExcuteEx<const char&>('s'));
-	
+	//using FType4 = void(int&, int&&);
+	//auto D4 = TDelegate<FType4>::CreateMemberFunc(&a, &Ca::f4);
+	//D4.setParamters<int&>(ia);
+	//D4.ExcuteEx<int&&>(20);
+	//
+	//using FType5 = void(int, int&, int&&);
+	//auto D5 = TDelegate<FType5>::CreateMemberFunc(&a, &Ca::f5, 90);
+	//D5.ExcuteEx<int&, int&&>(ia, 200);
+	//
+	//using FType6 = int(int, double&, char, const std::string&);
+	//auto D6 = TDelegate<FType6>::CreateMemberFunc(&a, &Ca::f6);
+	//D6.setParamters<int, double&>(ia, ic);
+	//WARNING_LOG(D6.ExcuteEx<char, std::string>('a', "str"));
+	//
+	//using FType7 = int(int, const char&);
+	//auto D7 = TDelegate<FType7>::CreateStatic(&Ca::f7, ia);
+	//WARNING_LOG(D7.ExcuteEx<const char&>('s'));
+	/*
 #else
 	auto lam1 = []() { DEBUG_LOG("lam"); };
 	using FType1 = void(void);
@@ -184,9 +185,39 @@ int main1()
 		return a + c;
 	}, 10, 'f', 35, "dow");
 	DEBUG_LOG(D6.Excute());
+	*/
 #endif
 
 
+
+	system("pause");
+	return 0;
+}
+#endif
+
+void G1(int a) { DEBUG_LOG("success"); }
+void G2(int& a) { DEBUG_LOG("success"); }
+void G3(const int& a) { DEBUG_LOG("success"); }
+void G4(int&& a) { DEBUG_LOG("success"); }
+
+int main()
+{
+	int a = 10;
+
+	auto D1 = TDelegate<decltype(G1)>::CreateStatic(G1, 10);
+	D1.Excute();
+
+	auto D2 = TDelegate<decltype(G2)>::CreateStatic(G2);
+	D2.setParamters<int&>(a);
+	D2.Excute();
+
+	auto D3 = TDelegate<decltype(G3)>::CreateStatic(G3);
+	D3.setParamters<const int&>(a);
+	D3.Excute();
+
+	auto D4 = TDelegate<decltype(G4)>::CreateStatic(G4);
+	//D4.setParamters<int&&>(20);
+	D4.ExcuteEx<int&&>(20);
 
 	system("pause");
 	return 0;

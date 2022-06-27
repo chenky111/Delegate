@@ -5,6 +5,9 @@
 #include <tuple>
 #include <iostream>
 #include <stdexcept>
+#include <chrono>
+
+#define ExecutTest 1
 
 using BaseFuncType = void(*)(void);
 
@@ -51,5 +54,14 @@ void PrintType()
 	ColorDebug(enmCFC_Blue, enmCBC_Black, __GET_FILE_LINE(), typeid(T).name());
 }
 
+//代码运行时间测试，建议使用 {} 测试
+class RunTimeTest {
+public:
+	RunTimeTest() : start(clock()) {}
+	~RunTimeTest() { auto t = clock() - start; WARNING_LOG("runTime:", t); }
+
+private:
+	clock_t start;
+};
 
 
