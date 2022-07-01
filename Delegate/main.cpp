@@ -77,29 +77,6 @@ void CT2(const TestClass tc)
 	int a = tc._a + 1;
 }
 
-
-void R1(int& a)
-{
-	DEBUG_LOG("int&", a);
-}
-
-void R1(const int& a)
-{
-	DEBUG_LOG("const int&", a);
-}
-
-void R1(int&& a)
-{
-	DEBUG_LOG("int&&", a);
-}
-
-
-template<typename T>
-void ward(T&& a)
-{
-	R1(std::forward<T>(a));
-}
-
 #if 0
 int main()
 {
@@ -107,47 +84,30 @@ int main()
 	TestClass t2;
 
 	{
-		RunTimeTest();
-		//std::function<void()> func = std::bind(Func);
-		//func();
-		//func = std::bind(&TestClass::F1, &t);
-		//func();
-		//func = std::bind(&TestClass::F2, &t);
-		//func();
+		auto r = RunTimeTest();
 
-		auto func = std::bind(CT1, std::placeholders::_1, t2);
-		func(t);
+		//auto D1 = TDelegate<decltype(CT11)>::CreateStatic(CT11);
+		//D1.setParamters<TestClass&>(t2);
+		//D1.Excute(t);
+		//DEBUG_LOG(t._a, t2._a);
+
+		auto D1 = TDelegate<decltype(CT2)>::CreateStatic(CT2, t);
+		//D1.setParamters<TestClass&>(t2);
+		D1.ExcuteAfter();
 	}
 
 	ERROR_LOG("========================");
 	{
-		RunTimeTest();
-		//auto D1 = FSimpleDelegate::CreateBase(Func);
-		//D1.Excute();
-		//D1 = FSimpleDelegate::CreateMemberFunc(&t, &TestClass::F1);
-		//D1.Excute();
-		//D1 = FSimpleDelegate::CreateMemberFunc(&t, &TestClass::F2);
-		//D1.Excute();
+		auto r = RunTimeTest();
 
-		auto D1 = TDelegate<decltype(CT11)>::CreateStatic(CT11);
-		D1.setParamters<TestClass&>(t2);
-		D1.Excute(t);
-		DEBUG_LOG(t._a, t2._a);
+
+		//auto func = std::bind(CT1, std::placeholders::_1, t2);
+		//func(t);
+
+		auto func = std::bind(CT2, t);
+		func();
 	}
 
-	{
-		int a = 10;
-		int& b = a;
-		int&& c = 20;
-		const int d = 30;
-		const int& e = 40;
-		ward(a);
-		ward(b);
-		ward(c);
-		ward(d);
-		ward(e);
-		ward(30);
-	}
 
 	system("pause");
 	return 0;

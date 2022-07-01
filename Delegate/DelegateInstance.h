@@ -20,17 +20,10 @@ public:
 
 public:
 
-#ifndef ExecutTest
-	virtual InRetValType Execute(std::tuple<ParamTypes...>&& argsTuple)
-	{
-		return InRetValType();
-	}
-#else
 	virtual InRetValType Execute(const ParamTypes&... args)
 	{
 		return InRetValType();
 	}
-#endif
 
 	//默认, 不能接受引用类型，使用 std::decay_t 所以会拷贝
 	template<typename... Args>
@@ -122,20 +115,12 @@ public:
 		return true;
 	}
 
-#ifndef ExecutTest
-	InRetValType Execute(TupleType&& argsTuple) override final
-	{
-		return std::apply(Functor, std::move(argsTuple));
-		//return _CallFunc(TupleSequence{});
-	}
-#else
 	InRetValType Execute(const ParamTypes&... args) override final
 	{
 		//return std::apply(Functor, args...);
 		//return _CallFunc(TupleSequence{});
 		return (*Functor)(args...);
 	}
-#endif
 
 private:
 	template<size_t... Index>
@@ -181,18 +166,6 @@ public:
 		return true;
 	}
 
-#ifndef ExecutTest
-	InRetValType Execute(TupleType&& argsTuple) override final
-	{
-		if (Functor == nullptr)
-		{
-			ERROR_LOG("TMemberFuncDelegateInstance Execute Is Error");
-			return InRetValType();
-		}
-
-		return _CallFunc(std::forward<TupleType>(argsTuple), TupleSequence{});
-	}
-#else
 	InRetValType Execute(const ParamTypes&... args) override final
 	{
 		if (Functor == nullptr)
@@ -201,9 +174,9 @@ public:
 			return InRetValType();
 		}
 
+		//return (UserObject->*Functor)(std::forward<ParamTypes>(args)...);
 		return (UserObject->*Functor)(args...);
 	}
-#endif
 
 private:
 	template<size_t... Index>
@@ -252,17 +225,11 @@ public:
 		return true;
 	}
 
-#ifndef ExecutTest
-	InRetValType Execute(TupleType&& argsTuple) override final
-	{
-		return _CallFunc(std::forward<TupleType>(argsTuple), TupleSequence{});
-	}
-#else
 	InRetValType Execute(const ParamTypes&... args) override final
 	{
+		//return Functor(std::forward<ParamTypes>(args)...);
 		return Functor(args...);
 	}
-#endif
 
 private:
 	template<size_t... Index>

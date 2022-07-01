@@ -3,6 +3,14 @@
 #include <memory>
 #include "DelegateInstance.h"
 
+enum class EDelegateType
+{
+	None = 0,
+	Static,
+	MemberFunc,
+	Lambda,
+};
+
 template<typename FuncType>
 class TBaseDelegate;
 
@@ -55,6 +63,12 @@ public:
 		DEBUG_LOG("Count = ", ins.use_count());
 	}
 
+	constexpr void SetType(const EDelegateType& type)
+	{
+		delegate_type = type;
+	}
+
 protected:
 	std::shared_ptr<TBaseDelegateInstance<FuncType>> ins;
+	EDelegateType delegate_type = EDelegateType::None;
 };

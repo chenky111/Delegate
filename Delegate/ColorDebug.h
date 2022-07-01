@@ -90,6 +90,7 @@ void ColorDebug(ConsoleForegroundColor foreColor, ConsoleBackGroundColor backCol
 }
 
 //#define StringFormat(format, ...) printf((std::string("%s:%s:%d ") + format + "\n").c_str(), __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define COLOR_LOG(cfc, cbc, ...) ColorDebug(cfc, cbc, __GET_FILE_LINE(), ##__VA_ARGS__)
 #define DEBUG_LOG(...) ColorDebug(enmCFC_Green, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
 #define WARNING_LOG(...) ColorDebug(enmCFC_Yellow, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
 #define ERROR_LOG(...) ColorDebug(enmCFC_Red, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)

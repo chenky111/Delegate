@@ -16,8 +16,34 @@ template<typename T>
 struct TDefineType
 {
 	//typedef T Type;
-	using Type = T;
+	using type = T;
 };
+
+template<typename T>
+struct remove_r_value
+{
+	using type = T;
+};
+
+template<typename T>
+struct remove_r_value<T&>
+{
+	using type = T&;
+};
+
+template<typename T>
+struct remove_r_value<T&&>
+{
+	using type = T;
+};
+
+//移除右值引用
+template<typename T>
+using remove_r_value_t = typename remove_r_value<T>::type;
+
+template<typename T>
+using remove_cvr_t = remove_r_value_t<std::remove_cv_t<T>>;
+
 
 //成员函数指针模板类型
 //前置声明（第一个模板参数，用来判断是否为常函数）
