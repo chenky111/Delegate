@@ -214,3 +214,51 @@ private:
 	//这样在常函数的情况下保持 const 的传递性，因为绑定不影响复制的可替换性
 	mutable typename std::remove_const_t<FunctorType> Functor;
 };
+
+
+template<bool bConst, typename UserClass, typename FType>
+class TSharePtrDelegateInstance;
+
+template<bool bConst, typename UserClass, typename InRetValType, typename... ParamTypes>
+class TSharePtrDelegateInstance<bConst, UserClass, InRetValType(ParamTypes...)> : public TBaseDelegateInstance<InRetValType(ParamTypes...)>
+{
+	template<typename T>
+	friend class TBaseDelegate;
+
+public:
+	using Super = TBaseDelegateInstance<InRetValType(ParamTypes...)>;
+	using RetValType = InRetValType;
+	using FuncType = InRetValType(ParamTypes...);
+	using SharePtrType = std::shared_ptr<UserClass>;
+	using WeakPtrType = std::weak_ptr<UserClass>;
+	using FuncTypePtr = typename TMemberFuncPtr<bConst, UserClass, FuncType>::Type;
+
+public:
+	//防止隐式转换，需要函数和参数类型一致
+	constexpr explicit TSharePtrDelegateInstance(const SharePtrType& InUserPtr, FuncTypePtr InFunc)
+		: UserPtr(InUserPtr)
+		, Functor(InFunc)
+	{
+	}
+
+	bool IsVaild() override final
+	{
+		return UserPtr.lock() != nullptr;
+	}
+
+	InRetValType Execute(const ParamTypes&... args) override final
+	{
+		if (!IsVaild())
+		{
+			ERROR_LOG("TSharePtrDelegateInstance Execute Is Error");
+			return InRetValType();
+		}
+
+		return (UserPtr.lock().get()->*Functor)(args...);
+	}
+
+private:
+
+	WeakPtrType UserPtr;
+	FuncTypePtr Functor;
+};

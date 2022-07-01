@@ -9,6 +9,7 @@ enum class EDelegateType
 	Static,
 	MemberFunc,
 	Lambda,
+	SharePtr,
 };
 
 template<typename FuncType>

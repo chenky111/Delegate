@@ -85,6 +85,26 @@ public:
 		return result;
 	}
 
+	template <typename UserClass, typename... Args>
+	static TDelegate CreateSharePtr(const std::shared_ptr<UserClass>& UserPtr, typename TMemberFuncPtr<false, UserClass, FuncType>::Type InFunc, Args&&... args)
+	{
+		TDelegate result;
+		result.SetType(EDelegateType::SharePtr);
+		result.ins = std::make_shared<TSharePtrDelegateInstance<false, UserClass, FuncType>>(UserPtr, InFunc);
+		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
+		return result;
+	}
+
+	template <typename UserClass, typename... Args>
+	static TDelegate CreateSharePtr(const std::shared_ptr<UserClass>& UserPtr, typename TMemberFuncPtr<true, UserClass, FuncType>::Type InFunc, Args&&... args)
+	{
+		TDelegate result;
+		result.SetType(EDelegateType::SharePtr);
+		result.ins = std::make_shared<TSharePtrDelegateInstance<true, UserClass, FuncType>>(UserPtr, InFunc);
+		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
+		return result;
+	}
+
 public:
 	//设置参数, 会覆盖原有的参数或者绑定的参数
 	//引用类型需要使用 <> 指定类型, 不支持右值引用类型
@@ -103,48 +123,51 @@ public:
 		return this->ins.use_count() > 0 && this->ins->IsVaild();
 	}
 
+	template<typename... Args>
+	constexpr InRetValType SaveExecute(Args&&... args)
+	{
+		if (IsSave())
+			Excute(std::forward<Args>(args)...);
+
+		return InRetValType();
+	}
+
 	//执行函数
 	template<typename... Args>
 	constexpr InRetValType operator()(Args&&... args)
 	{
-		return Excute(std::forward<Args>(args)...);
+		return Execute(std::forward<Args>(args)...);
 	}
 
 	//执行函数
 	template<typename... Args>
-	constexpr InRetValType Excute(Args&&... args)
+	constexpr InRetValType Execute(Args&&... args)
 	{
 		constexpr size_t index = sizeof...(ParamTypes) - sizeof...(Args);
 		using TupleSequence = std::make_index_sequence<index>;
-		return _Excute(TupleSequence{}, this->ins->CastParamters<sizeof...(Args)>(), std::forward<Args>(args)...);
+		return _Execute(TupleSequence{}, this->ins->CastParamters<sizeof...(Args)>(), std::forward<Args>(args)...);
 	}
 
 	//参数置后再执行
 	template<typename... Args>
-	constexpr InRetValType ExcuteAfter(Args&&... args)
+	constexpr InRetValType ExecuteAfter(Args&&... args)
 	{
 		constexpr size_t index = sizeof...(ParamTypes) - sizeof...(Args);
 		using TupleSequence = std::make_index_sequence<index>;
-		return _ExcuteBack(TupleSequence{}, this->ins->BackCastParamters<sizeof...(Args)>(), std::forward<Args>(args)...);
+		return _ExecuteBack(TupleSequence{}, this->ins->BackCastParamters<sizeof...(Args)>(), std::forward<Args>(args)...);
 	}
 
 protected:
 	template<size_t... Index, typename... TupleArgs, typename... Args>
-	constexpr InRetValType _Excute(std::index_sequence<Index...>, const std::tuple<TupleArgs...>& t, Args&&... args)
+	constexpr InRetValType _Execute(std::index_sequence<Index...>, const std::tuple<TupleArgs...>& t, Args&&... args)
 	{
-		if (IsSave())
-			return this->ins->Execute(remove_cvr_t<TupleArgs>(std::get<Index>(t))..., std::forward<Args>(args)...);
-
-		return InRetValType();
+		return this->ins->Execute(remove_cvr_t<TupleArgs>(std::get<Index>(t))..., std::forward<Args>(args)...);
 	}
 
 	template<size_t... Index, typename... TupleArgs, typename... Args>
-	constexpr InRetValType _ExcuteBack(std::index_sequence<Index...>, const std::tuple<TupleArgs...>& t, Args&&... args)
+	constexpr InRetValType _ExecuteBack(std::index_sequence<Index...>, const std::tuple<TupleArgs...>& t, Args&&... args)
 	{
-		if (IsSave())
-			return this->ins->Execute(std::forward<Args>(args)..., remove_cvr_t<TupleArgs>(std::get<Index>(t))...);
-
-		return InRetValType();
+		return this->ins->Execute(std::forward<Args>(args)..., remove_cvr_t<TupleArgs>(std::get<Index>(t))...);
 	}
 };
 

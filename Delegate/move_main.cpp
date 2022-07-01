@@ -37,16 +37,16 @@ int main()
 	{
 		FSimpleDelegate f1 = FSimpleDelegate::CreateBase(Func1);
 		//FSimpleDelegate f2 = f1;
-		f1.Excute();
+		f1.Execute();
 
 		cout << "========================" << endl;
 		f1 = FSimpleDelegate::CreateLambda([]() { cout << "Lambda" << endl; });
-		f1.Excute();
+		f1.Execute();
 		f1.Count();
 
 		cout << "========================" << endl;
 		f1 = FSimpleDelegate::CreateLambda([]() { cout << "Lambda2" << endl; });
-		f1.Excute();
+		f1.Execute();
 		f1.Count();
 
 		cout << "========================" << endl;
@@ -59,14 +59,14 @@ int main()
 		FSimpleDelegate f3 = FSimpleDelegate::CreateLambda([]() { cout << "Lambda3" << endl; });
 		f2 = f3;
 		f2.Count();
-		f2.Excute();
+		f2.Execute();
 
 		cout << "========" << endl;
 		TA a;
 		f3 = FSimpleDelegate::CreateMemberFunc(&a, &TA::Call);
-		f3.Excute();
+		f3.Execute();
 		f3.Count();
-		f2.Excute();
+		f2.Execute();
 		f2.Count();
 
 	}
@@ -79,7 +79,7 @@ int main()
 		auto l2 = std::move(l);
 		l2.setParamters(88);
 		//l.Excute(); //err
-		l2.Excute();
+		l2.Execute();
 	}
 
 

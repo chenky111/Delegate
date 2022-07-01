@@ -55,7 +55,7 @@ public:
 
 	TestClass() = default;
 	TestClass(const TestClass& other) { WARNING_LOG("is copy"); }
-	TestClass operator=(const TestClass& other) { WARNING_LOG("is copy ="); return TestClass(); }
+	TestClass& operator=(const TestClass& other) { WARNING_LOG("is copy ="); return *this; }
 
 public:
 	int _a = 0;
@@ -77,7 +77,7 @@ void CT2(const TestClass tc)
 	int a = tc._a + 1;
 }
 
-#if 0
+#if 1
 int main()
 {
 	TestClass t;
@@ -93,7 +93,7 @@ int main()
 
 		auto D1 = TDelegate<decltype(CT2)>::CreateStatic(CT2, t);
 		//D1.setParamters<TestClass&>(t2);
-		D1.ExcuteAfter();
+		D1.ExecuteAfter();
 	}
 
 	ERROR_LOG("========================");
@@ -107,6 +107,13 @@ int main()
 		auto func = std::bind(CT2, t);
 		func();
 	}
+
+	{
+		auto tPtr = std::make_shared<TestClass>();
+		auto D1 = TDelegate<int(int)>::CreateSharePtr(tPtr, &TestClass::F3);
+		DEBUG_LOG(D1.Execute(20));
+	}
+
 
 
 	system("pause");
