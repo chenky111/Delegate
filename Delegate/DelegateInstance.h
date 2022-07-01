@@ -12,7 +12,6 @@ class TBaseDelegateInstance<InRetValType(ParamTypes...)>
 
 public:
 	using FuncType = InRetValType(ParamTypes...);
-	//using ExcuteTuple = typename TMakeTupleOffsetUtil<FuncType, ParamTypes...>::type;
 
 public:
 	TBaseDelegateInstance() = default;
@@ -31,7 +30,6 @@ public:
 	{
 		static_assert(sizeof...(ParamTypes) >= sizeof...(args), "is to many args");
 		paramters = std::make_tuple(std::forward<Args>(args)...);
-		//paramters = std::tuple<std::decay_t<Args>...>(std::forward<Args>(args)...);
 	}
 
 	//可以接受引用类型, 需要使用 <> 指定类型
@@ -117,17 +115,10 @@ public:
 
 	InRetValType Execute(const ParamTypes&... args) override final
 	{
-		//return std::apply(Functor, args...);
-		//return _CallFunc(TupleSequence{});
 		return (*Functor)(args...);
 	}
 
 private:
-	template<size_t... Index>
-	InRetValType _CallFunc(TupleType&& tupIns, std::index_sequence<Index...>) const
-	{
-		return (*Functor)(std::forward<ParamTypes>(std::get<Index>(tupIns))...);
-	}
 
 	FuncTypePtr Functor;
 };
@@ -156,7 +147,6 @@ public:
 		: Functor(InFunc)
 		, UserObject(InUserObject)
 	{
-		//assert(InUserObject != nullptr && InFunc != nullptr, "InUserObject or InFunc is Null");
 	}
 
 public:
@@ -174,17 +164,10 @@ public:
 			return InRetValType();
 		}
 
-		//return (UserObject->*Functor)(std::forward<ParamTypes>(args)...);
 		return (UserObject->*Functor)(args...);
 	}
 
 private:
-	template<size_t... Index>
-	InRetValType _CallFunc(TupleType&& tupIns, std::index_sequence<Index...>) const
-	{
-		return (UserObject->*Functor)(std::forward<ParamTypes>(std::get<Index>(tupIns))...);
-		//return std::invoke(Functor, UserObject, std::forward<ParamTypes>(std::get<Index>(tupIns))...);
-	}
 
 	UserClass* UserObject;
 	FuncTypePtr Functor;
@@ -227,16 +210,10 @@ public:
 
 	InRetValType Execute(const ParamTypes&... args) override final
 	{
-		//return Functor(std::forward<ParamTypes>(args)...);
 		return Functor(args...);
 	}
 
 private:
-	template<size_t... Index>
-	InRetValType _CallFunc(TupleType&& tupIns, std::index_sequence<Index...>) const
-	{
-		return Functor(std::forward<ParamTypes>(std::get<Index>(tupIns))...);
-	}
 
 	//使用 mutable 主要是为了 Lambda 可以被绑定和执行
 	//不想把 Functor 的方法直接给委托子对象
