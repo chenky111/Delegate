@@ -95,8 +95,6 @@ public:
 	using RetValType = InRetValType;
 	using FuncType = InRetValType(ParamTypes...);
 	using FuncTypePtr = InRetValType(*)(ParamTypes...);
-	using TupleSequence = std::index_sequence_for<ParamTypes...>;
-	using TupleType = std::tuple<ParamTypes...>;
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
@@ -138,8 +136,6 @@ public:
 	using RetValType = InRetValType;
 	using FuncType = InRetValType(ParamTypes...);
 	using FuncTypePtr = typename TMemberFuncPtr<bConst, UserClass, FuncType>::Type;
-	using TupleSequence = std::index_sequence_for<ParamTypes...>;
-	using TupleType = std::tuple<ParamTypes...>;
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
@@ -184,11 +180,9 @@ class TLambdaDelegateInstance<InRetValType(ParamTypes...), FunctorType> : public
 	friend class TBaseDelegate;
 
 public:
+	using Super = TBaseDelegateInstance<InRetValType(ParamTypes...)>;
 	using RetValType = InRetValType;
 	using FuncType = InRetValType(ParamTypes...);
-	using TupleType = std::tuple<ParamTypes...>;
-	using TupleSequence = std::index_sequence_for<ParamTypes...>;
-	using TupleType = std::tuple<ParamTypes...>;
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
