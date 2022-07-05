@@ -27,33 +27,33 @@ public:
 
 	TBaseDelegate(const TBaseDelegate& other)
 	{
-		CopyForm(other);
+		copyForm(other);
 	}
 
 	TBaseDelegate(TBaseDelegate&& other) noexcept
 	{
-		MoveForm(std::move(other));
+		moveForm(std::move(other));
 	}
 
 	TBaseDelegate& operator=(const TBaseDelegate& other)
 	{
-		CopyForm(other);
+		copyForm(other);
 		return *this;
 	}
 
 	TBaseDelegate& operator=(TBaseDelegate&& other) noexcept
 	{
-		MoveForm(std::move(other));
+		moveForm(std::move(other));
 		return *this;
 	}
 
 public:
-	virtual void CopyForm(const TBaseDelegate& other)
+	virtual void copyForm(const TBaseDelegate& other)
 	{
 		this->ins = other.ins;
 	}
 
-	virtual void MoveForm(TBaseDelegate&& other)
+	virtual void moveForm(TBaseDelegate&& other)
 	{
 		this->ins.swap(other.ins);
 		other.ins = nullptr;
@@ -64,7 +64,7 @@ public:
 		DEBUG_LOG("Count = ", ins.use_count());
 	}
 
-	constexpr void SetType(const EDelegateType& type)
+	constexpr void setType(const EDelegateType& type)
 	{
 		delegate_type = type;
 	}

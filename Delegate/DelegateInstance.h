@@ -19,7 +19,7 @@ public:
 
 public:
 
-	virtual InRetValType Execute(const ParamTypes&... args)
+	virtual InRetValType execute(const ParamTypes&... args)
 	{
 		return InRetValType();
 	}
@@ -29,7 +29,7 @@ public:
 	void setParamtersDefault(Args&&... args)
 	{
 		static_assert(sizeof...(ParamTypes) >= sizeof...(args), "is to many args");
-		paramters = std::make_tuple(std::forward<Args>(args)...);
+		_paramters = std::make_tuple(std::forward<Args>(args)...);
 	}
 
 	//可以接受引用类型, 需要使用 <> 指定类型
@@ -37,47 +37,47 @@ public:
 	void setParamters(Args... args)
 	{
 		static_assert(sizeof...(ParamTypes) >= sizeof...(args), "is to many args");
-		paramters = std::tuple<Args...>(args...);
+		_paramters = std::tuple<Args...>(args...);
 	}
 
 	//从头开始偏移参数, any_cast 会造成额外的一次拷贝
 	template<size_t ArgsSize>
-	decltype(auto) CastParamters_Any()
+	decltype(auto) castParamters_Any()
 	{
 		constexpr size_t index = sizeof...(ParamTypes) - ArgsSize;	//得到已经填充了多少个参数
-		return std::any_cast<TMakeTupleForwardOffset<index, ParamTypes...>>(paramters);
+		return std::any_cast<TMakeTupleForwardOffset<index, ParamTypes...>>(_paramters);
 	}
 
 	//从头开始偏移参数, 不会有额外拷贝
 	template<size_t ArgsSize, size_t index = sizeof...(ParamTypes) - ArgsSize>
-	constexpr const TMakeTupleForwardOffset<index, ParamTypes...>& CastParamters()
+	constexpr const TMakeTupleForwardOffset<index, ParamTypes...>& castParamters()
 	{
-		return reinterpret_cast<const TMakeTupleForwardOffset<index, ParamTypes...>&>(paramters);
+		return reinterpret_cast<const TMakeTupleForwardOffset<index, ParamTypes...>&>(_paramters);
 	}
 
 	//从尾开始偏移参数, any_cast 会造成额外的一次拷贝
 	template<size_t ArgsSize>
-	decltype(auto) BackCastParamters_Any()
+	decltype(auto) backCastParamters_Any()
 	{
-		return std::any_cast<TMakeTupleOffset<ArgsSize, ParamTypes...>>(paramters);
+		return std::any_cast<TMakeTupleOffset<ArgsSize, ParamTypes...>>(_paramters);
 	}
 
 	//从尾开始偏移参数, 不会有额外拷贝
 	template<size_t ArgsSize>
-	constexpr const TMakeTupleOffset<ArgsSize, ParamTypes...>& BackCastParamters()
+	constexpr const TMakeTupleOffset<ArgsSize, ParamTypes...>& backCastParamters()
 	{
-		return reinterpret_cast<const TMakeTupleOffset<ArgsSize, ParamTypes...>&>(paramters);
+		return reinterpret_cast<const TMakeTupleOffset<ArgsSize, ParamTypes...>&>(_paramters);
 	}
 
-	virtual bool IsVaild()
+	virtual bool isVaild()
 	{
 		return true;
 	}
 
-	constexpr const std::any& GetParamters() { return paramters; }
+	constexpr const std::any& getParamters() { return _paramters; }
 
 protected:
-	std::any paramters;
+	std::any _paramters;
 };
 
 
@@ -98,27 +98,27 @@ public:
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
-	constexpr explicit TStaticDelegateInstance(FuncTypePtr InFunc)
+	constexpr explicit TStaticDelegateInstance(FuncTypePtr inFunc)
 		: Super()
-		, Functor(InFunc)
+		, _functor(inFunc)
 	{
 	}
 
 public:
-	bool IsVaild() override final
+	bool isVaild() override final
 	{
 		//静态函数一直都为 true
 		return true;
 	}
 
-	InRetValType Execute(const ParamTypes&... args) override final
+	InRetValType execute(const ParamTypes&... args) override final
 	{
-		return (*Functor)(args...);
+		return (*_functor)(args...);
 	}
 
 private:
 
-	FuncTypePtr Functor;
+	FuncTypePtr _functor;
 };
 
 
@@ -139,34 +139,34 @@ public:
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
-	constexpr explicit TMemberFuncDelegateInstance(UserClass* InUserObject, FuncTypePtr InFunc)
-		: Functor(InFunc)
-		, UserObject(InUserObject)
+	constexpr explicit TMemberFuncDelegateInstance(UserClass* inUserObject, FuncTypePtr inFunc)
+		: _functor(inFunc)
+		, _userObject(inUserObject)
 	{
 	}
 
 public:
-	bool IsVaild() override final
+	bool isVaild() override final
 	{
 		//无法确保指针是否有效，只能由使用者来判断，最好使用基于智能指针类型的对象
 		return true;
 	}
 
-	InRetValType Execute(const ParamTypes&... args) override final
+	InRetValType execute(const ParamTypes&... args) override final
 	{
-		if (Functor == nullptr)
+		if (_functor == nullptr)
 		{
-			ERROR_LOG("TMemberFuncDelegateInstance Execute Is Error");
+			ERROR_LOG("TMemberFuncDelegateInstance execute Is Error");
 			return InRetValType();
 		}
 
-		return (UserObject->*Functor)(args...);
+		return (_userObject->*_functor)(args...);
 	}
 
 private:
 
-	UserClass* UserObject;
-	FuncTypePtr Functor;
+	UserClass* _userObject;
+	FuncTypePtr _functor;
 };
 
 
@@ -186,33 +186,31 @@ public:
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
-	constexpr explicit TLambdaDelegateInstance(const FunctorType& InFunctor)
-		: Functor(InFunctor)
+	constexpr explicit TLambdaDelegateInstance(const FunctorType& inFunctor)
+		: _functor(inFunctor)
 	{
 	}
 
-	constexpr explicit TLambdaDelegateInstance(FunctorType&& InFunctor)
-		: Functor(std::move(InFunctor))
+	constexpr explicit TLambdaDelegateInstance(FunctorType&& inFunctor)
+		: _functor(std::move(inFunctor))
 	{
 	}
 
-	bool IsVaild() override final
+	bool isVaild() override final
 	{
 		//Lambda 总是安全的可执行对象
 		return true;
 	}
 
-	InRetValType Execute(const ParamTypes&... args) override final
+	InRetValType execute(const ParamTypes&... args) override final
 	{
-		return Functor(args...);
+		return _functor(args...);
 	}
 
 private:
 
-	//使用 mutable 主要是为了 Lambda 可以被绑定和执行
-	//不想把 Functor 的方法直接给委托子对象
-	//这样在常函数的情况下保持 const 的传递性，因为绑定不影响复制的可替换性
-	mutable typename std::remove_const_t<FunctorType> Functor;
+	//使用 mutable 主要是为了 Lambda 可以被绑定(修改)和执行
+	mutable typename std::remove_const_t<FunctorType> _functor;
 };
 
 
@@ -235,30 +233,30 @@ public:
 
 public:
 	//防止隐式转换，需要函数和参数类型一致
-	constexpr explicit TSharePtrDelegateInstance(const SharePtrType& InUserPtr, FuncTypePtr InFunc)
-		: UserPtr(InUserPtr)
-		, Functor(InFunc)
+	constexpr explicit TSharePtrDelegateInstance(const SharePtrType& inUserPtr, FuncTypePtr inFunc)
+		: _userPtr(inUserPtr)
+		, _functor(inFunc)
 	{
 	}
 
-	bool IsVaild() override final
+	bool isVaild() override final
 	{
-		return UserPtr.lock() != nullptr;
+		return _userPtr.lock() != nullptr;
 	}
 
-	InRetValType Execute(const ParamTypes&... args) override final
+	InRetValType execute(const ParamTypes&... args) override final
 	{
-		if (!IsVaild())
+		if (!isVaild())
 		{
-			ERROR_LOG("TSharePtrDelegateInstance Execute Is Error");
+			ERROR_LOG("TSharePtrDelegateInstance execute Is Error");
 			return InRetValType();
 		}
 
-		return (UserPtr.lock().get()->*Functor)(args...);
+		return (_userPtr.lock().get()->*_functor)(args...);
 	}
 
 private:
 
-	WeakPtrType UserPtr;
-	FuncTypePtr Functor;
+	WeakPtrType _userPtr;
+	FuncTypePtr _functor;
 };

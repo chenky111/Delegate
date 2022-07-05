@@ -26,7 +26,7 @@ public:
 	static TDelegate CreateBase(FuncType InFunc, Args&&... args)
 	{
 		TDelegate result;
-		result.SetType(EDelegateType::Static);
+		result.setType(EDelegateType::Static);
 		result.ins = std::make_shared<TStaticDelegateInstance<FuncType>>(InFunc);
 		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
 		return result;
@@ -36,7 +36,7 @@ public:
 	static TDelegate CreateStatic(typename TDefineType<InRetValType(*)(ParamTypes...)>::type InFunc, Args&&... args)
 	{
 		TDelegate result;
-		result.SetType(EDelegateType::Static);
+		result.setType(EDelegateType::Static);
 		result.ins = std::make_shared<TStaticDelegateInstance<FuncType>>(InFunc);
 		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
 		return result;
@@ -46,7 +46,7 @@ public:
 	static TDelegate CreateMemberFunc(UserClass* UserObject, typename TMemberFuncPtr<false, UserClass, FuncType>::Type InFunc, Args&&... args)
 	{
 		TDelegate result;
-		result.SetType(EDelegateType::MemberFunc);
+		result.setType(EDelegateType::MemberFunc);
 		result.ins = std::make_shared<TMemberFuncDelegateInstance<false, UserClass, FuncType>>(UserObject, InFunc);
 		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
 		return result;
@@ -56,7 +56,7 @@ public:
 	static TDelegate CreateMemberFunc(UserClass* UserObject, typename TMemberFuncPtr<true, UserClass, FuncType>::Type InFunc, Args&&... args)
 	{
 		TDelegate result;
-		result.SetType(EDelegateType::MemberFunc);
+		result.setType(EDelegateType::MemberFunc);
 		result.ins = std::make_shared<TMemberFuncDelegateInstance<true, UserClass, FuncType>>(UserObject, InFunc);
 		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
 		return result;
@@ -66,7 +66,7 @@ public:
 	static TDelegate CreateLambda(TFunc&& InFunc, Args&&... args)
 	{
 		TDelegate result;
-		result.SetType(EDelegateType::Lambda);
+		result.setType(EDelegateType::Lambda);
 		result.ins = std::make_shared<TLambdaDelegateInstance<FuncType, typename std::decay<TFunc>::type>>(std::forward<TFunc>(InFunc));
 		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
 		return result;
@@ -76,7 +76,7 @@ public:
 	static TDelegate CreateSharePtr(const std::shared_ptr<UserClass>& UserPtr, typename TMemberFuncPtr<false, UserClass, FuncType>::Type InFunc, Args&&... args)
 	{
 		TDelegate result;
-		result.SetType(EDelegateType::SharePtr);
+		result.setType(EDelegateType::SharePtr);
 		result.ins = std::make_shared<TSharePtrDelegateInstance<false, UserClass, FuncType>>(UserPtr, InFunc);
 		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
 		return result;
@@ -86,7 +86,7 @@ public:
 	static TDelegate CreateSharePtr(const std::shared_ptr<UserClass>& UserPtr, typename TMemberFuncPtr<true, UserClass, FuncType>::Type InFunc, Args&&... args)
 	{
 		TDelegate result;
-		result.SetType(EDelegateType::SharePtr);
+		result.setType(EDelegateType::SharePtr);
 		result.ins = std::make_shared<TSharePtrDelegateInstance<true, UserClass, FuncType>>(UserPtr, InFunc);
 		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
 		return result;
@@ -105,16 +105,16 @@ public:
 		this->ins->setParamters<std::remove_cv_t<Args>...>(args...);
 	}
 
-	constexpr bool IsSave()
+	constexpr bool isSave()
 	{
-		return this->ins.use_count() > 0 && this->ins->IsVaild();
+		return this->ins.use_count() > 0 && this->ins->isVaild();
 	}
 
 	template<typename... Args>
-	constexpr InRetValType SaveExecute(Args&&... args)
+	constexpr InRetValType saveExecute(Args&&... args)
 	{
-		if (IsSave())
-			Excute(std::forward<Args>(args)...);
+		if (isSave())
+			Execute(std::forward<Args>(args)...);
 
 		return InRetValType();
 	}
@@ -132,7 +132,7 @@ public:
 	{
 		constexpr size_t index = sizeof...(ParamTypes) - sizeof...(Args);
 		using TupleSequence = std::make_index_sequence<index>;
-		return _Execute(TupleSequence{}, this->ins->CastParamters<sizeof...(Args)>(), std::forward<Args>(args)...);
+		return _Execute(TupleSequence{}, this->ins->castParamters<sizeof...(Args)>(), std::forward<Args>(args)...);
 	}
 
 	//参数置前再执行
@@ -141,20 +141,20 @@ public:
 	{
 		constexpr size_t index = sizeof...(ParamTypes) - sizeof...(Args);
 		using TupleSequence = std::make_index_sequence<index>;
-		return _ExecuteBack(TupleSequence{}, this->ins->BackCastParamters<sizeof...(Args)>(), std::forward<Args>(args)...);
+		return _ExecuteBack(TupleSequence{}, this->ins->backCastParamters<sizeof...(Args)>(), std::forward<Args>(args)...);
 	}
 
 protected:
 	template<size_t... Index, typename... TupleArgs, typename... Args>
 	constexpr InRetValType _Execute(std::index_sequence<Index...>, const std::tuple<TupleArgs...>& t, Args&&... args)
 	{
-		return this->ins->Execute(remove_cvr_t<TupleArgs>(std::get<Index>(t))..., std::forward<Args>(args)...);
+		return this->ins->execute(remove_cvr_t<TupleArgs>(std::get<Index>(t))..., std::forward<Args>(args)...);
 	}
 
 	template<size_t... Index, typename... TupleArgs, typename... Args>
 	constexpr InRetValType _ExecuteBack(std::index_sequence<Index...>, const std::tuple<TupleArgs...>& t, Args&&... args)
 	{
-		return this->ins->Execute(std::forward<Args>(args)..., remove_cvr_t<TupleArgs>(std::get<Index>(t))...);
+		return this->ins->execute(std::forward<Args>(args)..., remove_cvr_t<TupleArgs>(std::get<Index>(t))...);
 	}
 };
 
