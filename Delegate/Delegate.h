@@ -22,8 +22,6 @@ public:
 	using Super::Super;
 
 public:
-	//2种方法效果都一样
-#if 1
 	template<typename... Args>
 	static TDelegate CreateBase(FuncType InFunc, Args&&... args)
 	{
@@ -33,17 +31,6 @@ public:
 		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
 		return result;
 	}
-#else
-	template<typename... Args>
-	static TDelegate CreateBase(typename TDefineType<InRetValType(*)(ParamTypes...)>::type InFunc, Args&&... args)
-	{
-		TDelegate result;
-		result.SetType(EDelegateType::Static);
-		result.ins = std::make_shared<TStaticDelegateInstance<FuncType>>(InFunc);
-		result.ins->setParamtersDefault<Args...>(std::forward<Args>(args)...);
-		return result;
-	}
-#endif
 
 	template<typename... Args>
 	static TDelegate CreateStatic(typename TDefineType<InRetValType(*)(ParamTypes...)>::type InFunc, Args&&... args)
@@ -148,7 +135,7 @@ public:
 		return _Execute(TupleSequence{}, this->ins->CastParamters<sizeof...(Args)>(), std::forward<Args>(args)...);
 	}
 
-	//参数置后再执行
+	//参数置前再执行
 	template<typename... Args>
 	constexpr InRetValType ExecuteAfter(Args&&... args)
 	{
