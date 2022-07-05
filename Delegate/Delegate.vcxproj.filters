@@ -18,9 +18,6 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="move_main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="execute_main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

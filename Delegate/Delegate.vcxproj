@@ -144,7 +144,6 @@
     <ClCompile Include="ColorDebug.cpp" />
     <ClCompile Include="execute_main.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="move_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseDelegate.h" />
