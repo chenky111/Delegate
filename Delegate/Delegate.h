@@ -105,15 +105,15 @@ public:
 		this->ins->setParamters<std::remove_cv_t<Args>...>(args...);
 	}
 
-	constexpr bool isSave()
+	constexpr bool isSafe()
 	{
 		return this->ins.use_count() > 0 && this->ins->isVaild();
 	}
 
 	template<typename... Args>
-	constexpr InRetValType saveExecute(Args&&... args)
+	constexpr InRetValType safeExecute(Args&&... args)
 	{
-		if (isSave())
+		if (isSafe())
 			Execute(std::forward<Args>(args)...);
 
 		return InRetValType();
