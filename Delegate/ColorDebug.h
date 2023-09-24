@@ -30,6 +30,62 @@ std::string GetLogFileName(const std::string& fileName);
 #if _WIN32 || _WIN64
 #include <Windows.h>
 
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN10  // Win10 SDK, 使用 ANSI 转义码
+//前景颜色（字体颜色）
+enum ConsoleForegroundColor
+{
+	enmCFC_Red = 31,
+	enmCFC_Green = 32,
+	enmCFC_Yellow = 33,
+	enmCFC_Blue = 34,
+	enmCFC_Purple = 35,
+	enmCFC_DarkGreen = 36,
+	enmCFC_White = 37,
+	enmCFC_Black = 30,
+};
+
+//背景颜色（字体底色）
+enum ConsoleBackGroundColor
+{
+	enmCBC_Red = 41,
+	enmCBC_Green = 42,
+	enmCBC_Yellow = 43,
+	enmCBC_Blue = 44,
+	enmCBC_DarkGreen = 46,
+	enmCBC_Purple = 45,
+	enmCBC_White = 47,
+	enmCBC_Black = 40,
+};
+
+//高亮属性设置
+constexpr const char* HightLigntColorProperty = "1m";
+
+//设置终端颜色
+template<typename... Args>
+void ColorDebug(ConsoleForegroundColor foreColor, ConsoleBackGroundColor backColor, const SFileLine& logData, const Args&... args)
+{
+	std::string prefix = std::string("\033[") + std::to_string(backColor) + ";" + std::to_string(foreColor) + "m";
+	std::string suffix = std::string("\033[0m");
+
+	AppendLog(prefix, GetLogFileName(logData.file)); prefix += " [";
+	AppendLog(prefix, logData.function); prefix += ":";
+	AppendLog(prefix, logData.line); prefix += "]: ";
+
+	//C++17 折叠表达式
+	((AppendLog(prefix, args), prefix += " "), ...);
+
+	prefix += suffix;
+	std::cout << prefix << std::endl;
+}
+
+
+//#define StringFormat(format, ...) printf((std::string("%s:%s:%d ") + format + "\n").c_str(), __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define COLOR_LOG(cfc, cbc, ...) ColorDebug(cfc, cbc, __GET_FILE_LINE(), ##__VA_ARGS__)
+#define DEBUG_LOG(...) ColorDebug(enmCFC_Green, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
+#define WARNING_LOG(...) ColorDebug(enmCFC_Yellow, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
+#define ERROR_LOG(...) ColorDebug(enmCFC_Red, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
+
+#else
 //   0 = 黑色      8 = 灰色
 //   1 = 蓝色      9 = 淡蓝色
 //   2 = 绿色      A = 淡绿色
@@ -95,8 +151,9 @@ void ColorDebug(ConsoleForegroundColor foreColor, ConsoleBackGroundColor backCol
 #define WARNING_LOG(...) ColorDebug(enmCFC_Yellow, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
 #define ERROR_LOG(...) ColorDebug(enmCFC_Red, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
 
-#else
-#if __linux
+#endif
+
+#elif __linux
 //前景颜色（字体颜色）
 enum ConsoleForegroundColor
 {
@@ -146,11 +203,11 @@ void ColorDebug(ConsoleForegroundColor foreColor, ConsoleBackGroundColor backCol
 
 
 //#define StringFormat(format, ...) printf((std::string("%s:%s:%d ") + format + "\n").c_str(), __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#define DebugLog(...) ColorDebug(enmCFC_Green, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
-#define WarningLog(...) ColorDebug(enmCFC_Yellow, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
-#define  ErrorLog(...) ColorDebug(enmCFC_Red, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
+#define COLOR_LOG(cfc, cbc, ...) ColorDebug(cfc, cbc, __GET_FILE_LINE(), ##__VA_ARGS__)
+#define DEBUG_LOG(...) ColorDebug(enmCFC_Green, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
+#define WARNING_LOG(...) ColorDebug(enmCFC_Yellow, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
+#define ERROR_LOG(...) ColorDebug(enmCFC_Red, enmCBC_Black, __GET_FILE_LINE(), ##__VA_ARGS__)
 
-#endif
 #endif
 
 template<typename... Args>
