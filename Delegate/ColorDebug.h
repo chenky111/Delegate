@@ -36,7 +36,8 @@ static bool isColorDebugInit = false;
 
 //初始化设置
 //有部分win10环境下的代码，不能使用ANSI转义序列，所以输出前需要进行初始化
-void ColorDebugInit()
+//加 inline 防止多个头文件引用
+inline void ColorDebugInit()
 {
 	HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);		//输入句柄
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);		//输出句柄
