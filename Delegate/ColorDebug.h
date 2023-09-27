@@ -31,6 +31,24 @@ std::string GetLogFileName(const std::string& fileName);
 #include <Windows.h>
 
 #if _WIN32_WINNT >= _WIN32_WINNT_WIN10  // Win10 SDK, 使用 ANSI 转义码
+
+static bool isColorDebugInit = false;
+
+//初始化设置
+//有部分win10环境下的代码，不能使用ANSI转义序列，所以输出前需要进行初始化
+void ColorDebugInit()
+{
+	HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);		//输入句柄
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);		//输出句柄
+	DWORD dwInMode, dwOutMode;
+	GetConsoleMode(hIn, &dwInMode);						//获取控制台输入模式
+	GetConsoleMode(hOut, &dwOutMode);					//获取控制台输出模式
+	dwInMode |= 0x0200;									//ENABLE_MOUSE_INPUT 标志，设置这个标志后，鼠标可以在控制台窗口中使用。
+	dwOutMode |= 0x0004;								//ENABLE_VIRTUAL_TERMINAL_PROCESSING 标志，设置这个标志后，控制台可以处理特殊的字符序列，例如ANSI转义序列。
+	SetConsoleMode(hIn, dwInMode);						//设置控制台输入模式
+	SetConsoleMode(hOut, dwOutMode);					//设置控制台输出模式
+}
+
 //前景颜色（字体颜色）
 enum ConsoleForegroundColor
 {
@@ -64,6 +82,12 @@ constexpr const char* HightLigntColorProperty = "1m";
 template<typename... Args>
 void ColorDebug(ConsoleForegroundColor foreColor, ConsoleBackGroundColor backColor, const SFileLine& logData, const Args&... args)
 {
+	if (!isColorDebugInit)
+	{
+		ColorDebugInit();
+		isColorDebugInit = true;
+	}
+
 	std::string prefix = std::string("\033[") + std::to_string(backColor) + ";" + std::to_string(foreColor) + "m";
 	std::string suffix = std::string("\033[0m");
 
